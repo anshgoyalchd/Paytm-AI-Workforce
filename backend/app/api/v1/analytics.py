@@ -70,3 +70,10 @@ async def get_workforce_overview(
             "compliance_adherence_pct": 100.0,
         },
     }
+
+
+@router.get("/cognee-health")
+async def get_cognee_health():
+    """Returns live Cognee Cloud connectivity and status."""
+    from backend.app.providers.cognee_adapter import cognee_adapter
+    return await cognee_adapter.check_health()

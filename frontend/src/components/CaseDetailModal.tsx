@@ -11,7 +11,8 @@ import {
   FileText, 
   RefreshCw,
   PhoneCall,
-  MessageSquare
+  MessageSquare,
+  Zap
 } from 'lucide-react';
 import { CaseDetail, Message, Decision } from '../types';
 import { api } from '../services/api';
@@ -32,12 +33,36 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
   const [customerInput, setCustomerInput] = useState<string>('');
   const [isTriggering, setIsTriggering] = useState<boolean>(false);
   const [turnResult, setTurnResult] = useState<any | null>(null);
+  const [isAutoReaching, setIsAutoReaching] = useState<boolean>(false);
+  const [autoReachResult, setAutoReachResult] = useState<any | null>(null);
+  const [selectedOutreachChannel, setSelectedOutreachChannel] = useState<'AUTO' | 'VOICE' | 'WHATSAPP'>('AUTO');
 
   useEffect(() => {
     if (caseId) {
       loadDetail(caseId);
     }
   }, [caseId]);
+
+  const handleAutonomousOutreach = async () => {
+    if (!caseId) return;
+    try {
+      setIsAutoReaching(true);
+      setAutoReachResult(null);
+      const channelParam = selectedOutreachChannel === 'AUTO' ? undefined : selectedOutreachChannel;
+      const res = await api.triggerAutoReach(caseId, channelParam);
+      setAutoReachResult(res);
+      await loadDetail(caseId);
+      onCaseUpdated();
+    } catch (err: any) {
+      console.error('Failed autonomous outreach:', err);
+      setAutoReachResult({
+        success: false,
+        action_summary: err.response?.data?.detail || err.message || 'Outreach failed'
+      });
+    } finally {
+      setIsAutoReaching(false);
+    }
+  };
 
   const loadDetail = async (id: string) => {
     try {
@@ -209,6 +234,86 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
 
             {/* Right Column: Live Conversation & AI Loop (7 cols) */}
             <div className="lg:col-span-7 p-5 flex flex-col justify-between space-y-4 bg-white">
+              {/* Autonomous AI Outreach Action Panel */}
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 shadow-xs space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-[#002970] text-white flex items-center justify-center">
+                      <Zap className="w-4 h-4 text-amber-300 fill-amber-300" />
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900">Autonomous Outreach Engine</h4>
+                      <p className="text-[11px] text-slate-500">Analyzes overdue days, past promises, Cognee memory & dispatches touch</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={selectedOutreachChannel}
+                      onChange={(e) => setSelectedOutreachChannel(e.target.value as any)}
+                      className="px-2 py-1 text-xs rounded-md bg-white border border-slate-300 text-slate-800 shadow-xs focus:outline-none"
+                    >
+                      <option value="AUTO">Auto (AI Decides)</option>
+                      <option value="VOICE">Voice Call (Twilio)</option>
+                      <option value="WHATSAPP">WhatsApp / SMS</option>
+                    </select>
+
+                    <button
+                      onClick={handleAutonomousOutreach}
+                      disabled={isAutoReaching}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#002970] hover:bg-[#001f54] text-white font-semibold text-xs shadow-xs transition-all disabled:opacity-50 shrink-0"
+                    >
+                      {isAutoReaching ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                          <span>Contacting...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="w-3.5 h-3.5 text-amber-300 fill-amber-300" />
+                          <span>Trigger Touch</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Auto Reach Result Banner */}
+                {autoReachResult && (
+                  <div className={`p-3 rounded-lg text-xs border ${
+                    autoReachResult.success ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'
+                  }`}>
+                    <div className="font-semibold flex items-center justify-between mb-1">
+                      <span className="flex items-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                        {autoReachResult.action_summary}
+                      </span>
+                      {autoReachResult.channel && (
+                        <span className="font-mono text-[10px] px-2 py-0.5 rounded bg-white border border-emerald-200 text-emerald-800">
+                          Channel: {autoReachResult.channel}
+                        </span>
+                      )}
+                    </div>
+                    {autoReachResult.analysis && (
+                      <div className="text-[11px] text-slate-700 mt-1.5 grid grid-cols-2 gap-1 bg-white p-2 rounded border border-emerald-100">
+                        <div><span className="text-slate-500">Days Overdue:</span> {autoReachResult.analysis.days_overdue} days</div>
+                        <div><span className="text-slate-500">Broken Commitments:</span> {autoReachResult.analysis.broken_promises_count}</div>
+                        {autoReachResult.dispatch_result?.sid && (
+                          <div className="col-span-2 font-mono text-[10px] text-slate-600">
+                            Twilio Dispatch SID: {autoReachResult.dispatch_result.sid} ({autoReachResult.dispatch_result.status})
+                          </div>
+                        )}
+                        {autoReachResult.analysis.cognee_context && (
+                          <div className="col-span-2 text-[10px] text-slate-600 italic">
+                            Cognee Memory: {autoReachResult.analysis.cognee_context}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Latest AI Decision Card */}
               {detail.decisions.length > 0 && (
                 <div className="p-4 rounded-xl bg-blue-50/60 border border-blue-100 space-y-2">

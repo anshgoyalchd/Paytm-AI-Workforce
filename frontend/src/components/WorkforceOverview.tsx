@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   IndianRupee, 
   TrendingUp, 
@@ -9,16 +9,26 @@ import {
   MessageSquare, 
   Cpu, 
   ArrowRight,
-  Clock
+  Clock,
+  Zap,
+  RefreshCw,
+  X,
+  FileText
 } from 'lucide-react';
 import { WorkforceOverview as OverviewType } from '../types';
+import { api } from '../services/api';
 
 interface OverviewProps {
   overview: OverviewType | null;
   onNavigateTab: (tab: string) => void;
+  onRefresh?: () => void;
 }
 
-export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigateTab }) => {
+export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigateTab, onRefresh }) => {
+  const [isReachingAll, setIsReachingAll] = useState(false);
+  const [autoReachResult, setAutoReachResult] = useState<any>(null);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
   if (!overview) {
     return (
       <div className="flex items-center justify-center p-16 text-slate-500">
@@ -26,6 +36,20 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
       </div>
     );
   }
+
+  const handleAutoReachAll = async () => {
+    try {
+      setIsReachingAll(true);
+      setErrorMsg(null);
+      const res = await api.triggerAutoReachAll();
+      setAutoReachResult(res);
+      if (onRefresh) onRefresh();
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.detail || 'Failed to execute autonomous outreach.');
+    } finally {
+      setIsReachingAll(false);
+    }
+  };
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -48,16 +72,33 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
               </h2>
             </div>
             <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
-              Operating continuously within RBI and Paytm fair recovery practice guardrails. Actively evaluates customer payment intents, verifies receipts against payment gateways, and escalates disputes autonomously.
+              Operating continuously within RBI and Paytm fair recovery practice guardrails. Automatically evaluates customer payment intents, overdue days, past commitments, and Cognee memory to contact debtors via WhatsApp or Voice.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={handleAutoReachAll}
+              disabled={isReachingAll || overview.active_cases === 0}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-[#002970] text-white hover:bg-[#001f54] disabled:opacity-50 transition-all shadow-xs cursor-pointer"
+            >
+              {isReachingAll ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  <span>Analyzing & Contacting...</span>
+                </>
+              ) : (
+                <>
+                  <Zap className="w-3.5 h-3.5 text-amber-300" />
+                  <span>⚡ Run Autonomous Outreach</span>
+                </>
+              )}
+            </button>
             <button
               onClick={() => onNavigateTab('simulator')}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-[#002970] text-white hover:bg-[#001f54] transition-all shadow-xs"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all shadow-xs cursor-pointer"
             >
-              <span>Test Simulator (8 Scenarios)</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Simulator</span>
+              <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
             </button>
           </div>
         </div>
@@ -237,6 +278,109 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
           </button>
         </div>
       </div>
+
+      {/* Auto Reach Results Modal */}
+      {autoReachResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
+          <div className="w-full max-w-2xl rounded-xl bg-white border border-slate-200 shadow-2xl overflow-hidden max-h-[85vh] flex flex-col animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-slate-50">
+              <div className="flex items-center gap-2">
+                <Zap className="w-5 h-5 text-amber-500" />
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Autonomous Portfolio Outreach Completed
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Processed {autoReachResult.total_processed} accounts • {autoReachResult.successful_touches} outbound contacts executed
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAutoReachResult(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 flex-1">
+              {autoReachResult.results?.map((res: any, idx: number) => (
+                <div key={idx} className="p-4 rounded-xl border border-slate-200 bg-slate-50/60 space-y-2.5 text-xs">
+                  <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+                    <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                      <span>{res.customer_name}</span>
+                      <span className="font-mono text-[11px] text-slate-500">({res.phone})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                        {res.channel === 'VOICE' ? 'VOICE CALL' : 'WHATSAPP'}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        {res.delivery_status || 'DELIVERED'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {res.analysis && (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] bg-white p-2.5 rounded-lg border border-slate-200">
+                      <div>
+                        <span className="text-slate-500 block">Dues:</span>
+                        <span className="font-bold text-slate-800">₹{res.analysis.outstanding_amount?.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">Overdue:</span>
+                        <span className="font-semibold text-slate-800">{res.analysis.days_overdue} Days</span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">Commitments:</span>
+                        <span className="font-semibold text-slate-800">
+                          {res.analysis.has_broken_commitment ? 'Broken Promise' : 'None'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-500 block">Memory Graph:</span>
+                        <span className="font-semibold text-emerald-700">Cognee Synced</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-3 rounded-lg bg-blue-50/70 border border-blue-200 text-slate-900 leading-relaxed font-medium text-xs">
+                    <span className="block text-[10px] font-bold uppercase tracking-wider text-blue-700 mb-1">
+                      Dispatched Contextual Message:
+                    </span>
+                    "{res.agent_message}"
+                  </div>
+
+                  {res.provider_reference && (
+                    <div className="text-[10px] font-mono text-slate-400 flex items-center justify-between pt-1">
+                      <span>Provider: {res.provider}</span>
+                      <span>Ref: {res.provider_reference}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="p-4 border-t border-slate-200 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setAutoReachResult(null)}
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-[#002970] text-white hover:bg-[#001f54] transition-all cursor-pointer"
+              >
+                Close & Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between">
+          <span>{errorMsg}</span>
+          <button onClick={() => setErrorMsg(null)} className="text-rose-400 hover:text-rose-600">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
     </div>
   );
 };

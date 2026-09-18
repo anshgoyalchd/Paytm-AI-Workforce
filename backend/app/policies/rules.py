@@ -93,8 +93,19 @@ class ContactHoursRule(BasePolicyRule):
         local_dt = current_time.astimezone(local_tz)
         current_hour = local_dt.hour
 
-        start_hour = settings.contact_start_hour or 9
-        end_hour = settings.contact_end_hour or 19
+        start_hour = settings.contact_start_hour if settings.contact_start_hour is not None else 9
+        end_hour = settings.contact_end_hour if settings.contact_end_hour is not None else 19
+
+        # 24/7 Testing & Trial Mode: If start_hour is 0 and end_hour is 24 or 0 or >= 23, or if manual trigger
+        is_trial_mode = (start_hour == 0 and (end_hour >= 23 or end_hour == 0 or end_hour == 24))
+        is_manual_trigger = getattr(case, "_is_manual_trigger", False) or getattr(settings, "_is_manual_trigger", False)
+
+        if is_trial_mode or is_manual_trigger:
+            return PolicyEvaluationResult(
+                is_allowed=True,
+                policy_name=self.name,
+                reason="24/7 Verified Trial Mode / Manual Operator Trigger: Outbound action permitted anytime.",
+            )
 
         if current_hour < start_hour or current_hour >= end_hour:
             # Calculate hours until start_hour next morning
@@ -132,6 +143,10 @@ class FrequencyLimitRule(BasePolicyRule):
     ) -> PolicyEvaluationResult:
         if action_type in (ActionType.WAIT, ActionType.ESCALATE):
             return PolicyEvaluationResult(is_allowed=True, policy_name=self.name, reason="Exempt from frequency limits.")
+
+        # Manual operator triggers bypass frequency caps for trial verification
+        if getattr(case, "_is_manual_trigger", False) or getattr(settings, "_is_manual_trigger", False):
+            return PolicyEvaluationResult(is_allowed=True, policy_name=self.name, reason="Manual operator outreach permitted.")
 
         current_time = now or datetime.now(timezone.utc)
         one_day_ago = current_time - timedelta(days=1)
@@ -187,7 +202,11 @@ class ChannelCooldownRule(BasePolicyRule):
         now: Optional[datetime] = None,
     ) -> PolicyEvaluationResult:
         if action_type in (ActionType.WAIT, ActionType.ESCALATE):
-            return PolicyEvaluationResult(is_allowed=True, policy_name=self.name, reason="Exempt from cooldown.")
+            return PolicyEvaluationResult(is_allowed=True, policy_name=self.name, reason="Exempt from channel cooldown.")
+
+        # Manual operator triggers bypass cooldown for testing
+        if getattr(case, "_is_manual_trigger", False) or getattr(settings, "_is_manual_trigger", False):
+            return PolicyEvaluationResult(is_allowed=True, policy_name=self.name, reason="Manual operator outreach permitted.")
 
         current_time = now or datetime.now(timezone.utc)
         min_cooldown_hours = settings.min_hours_between_contacts or 4

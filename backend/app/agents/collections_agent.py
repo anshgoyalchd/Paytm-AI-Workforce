@@ -319,5 +319,219 @@ class CollectionsAgent:
             "execution": execution_output,
         }
 
+    async def run_autonomous_outreach(
+        self,
+        session: AsyncSession,
+        case_id: str,
+        preferred_channel: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """
+        1-Click Autonomous Outreach Engine:
+        Analyzes due payment, previous interaction records, pending commitments,
+        and Cognee memory, then automatically initiates outreach (WhatsApp or Voice call) to debtor.
+        """
+        # 1. Fetch case and related models
+        stmt = select(CollectionCase).where(CollectionCase.id == case_id)
+        res = await session.execute(stmt)
+        case = res.scalar_one_or_none()
+        if not case:
+            raise ValueError(f"Case {case_id} not found")
+
+        cust_stmt = select(Customer).where(Customer.id == case.customer_id)
+        customer = (await session.execute(cust_stmt)).scalar_one()
+
+        inv_stmt = select(Invoice).where(Invoice.id == case.invoice_id)
+        invoice = (await session.execute(inv_stmt)).scalar_one()
+
+        from backend.app.models.models import Merchant
+        merch_stmt = select(Merchant).where(Merchant.id == case.merchant_id)
+        merchant = (await session.execute(merch_stmt)).scalar_one_or_none()
+        business_name = merchant.business_name if merchant else "Paytm Merchant"
+
+        setting_stmt = select(AgentSetting).where(AgentSetting.merchant_id == case.merchant_id)
+        settings = (await session.execute(setting_stmt)).scalar_one_or_none()
+        if not settings:
+            settings = AgentSetting(merchant_id=case.merchant_id)
+
+        # 2. Analyze Dues & Overdue Days
+        today = date.today()
+        due_date = invoice.due_date
+        if isinstance(due_date, datetime):
+            due_date = due_date.date()
+        days_overdue = max(0, (today - due_date).days) if due_date else 0
+        outstanding = float(case.outstanding_amount)
+
+        # 3. Analyze Past Commitments
+        commit_stmt = (
+            select(PaymentCommitment)
+            .where(PaymentCommitment.case_id == case.id)
+            .order_by(PaymentCommitment.created_at.desc())
+        )
+        commitments = (await session.execute(commit_stmt)).scalars().all()
+        broken_commitment = None
+        for c in commitments:
+            if c.commitment_date and c.commitment_date < today and c.status == "PENDING":
+                broken_commitment = c
+                break
+
+        # 4. Analyze Previous Conversation Records
+        conv_stmt = (
+            select(Conversation)
+            .where(Conversation.case_id == case.id)
+            .order_by(Conversation.created_at.desc())
+        )
+        conv_res = await session.execute(conv_stmt)
+        conv = conv_res.scalar_one_or_none()
+        past_messages_count = 0
+        if conv:
+            msg_stmt = select(Message).where(Message.conversation_id == conv.id).order_by(Message.timestamp.asc())
+            messages = (await session.execute(msg_stmt)).scalars().all()
+            past_messages_count = len(messages)
+        else:
+            conv = Conversation(
+                case_id=case.id,
+                channel=customer.preferred_channel or "WHATSAPP",
+                state="ACTIVE",
+            )
+            session.add(conv)
+            await session.flush()
+
+        # 5. Retrieve Cognee Durable Memory
+        memory_ctx = await cognee_adapter.retrieve_customer_context(
+            merchant_id=case.merchant_id,
+            customer_id=customer.id,
+            case_id=case.id,
+        )
+
+        # 6. Determine Channel (Voice Call vs WhatsApp)
+        channel = preferred_channel or customer.preferred_channel or "WHATSAPP"
+        if not preferred_channel and settings.auto_voice_enabled and (days_overdue > 14 or case.priority == "HIGH"):
+            channel = "VOICE"
+
+        lang = customer.preferred_language or "Hindi"
+        pay_link = f"https://paytm.com/pay/{invoice.invoice_number}"
+
+        # 7. Formulate Contextual Message based on Full Analysis
+        if broken_commitment:
+            c_date_str = broken_commitment.commitment_date.strftime("%d %b")
+            if lang == "Hindi":
+                outreach_text = (
+                    f"नमस्ते {customer.name} जी, यह {business_name} से इनवॉइस {invoice.invoice_number} (बकाया ₹{outstanding:,.2f}) के संदर्भ में है। "
+                    f"आपके द्वारा {c_date_str} तक भुगतान करने का वादा किया गया था जो अभी तक अप्राप्त है। "
+                    f"कृपया अपने अच्छे रिकॉर्ड को बनाए रखने हेतु तुरंत भुगतान करें: {pay_link}"
+                )
+            else:
+                outreach_text = (
+                    f"Hello {customer.name}, this is from {business_name} regarding overdue invoice {invoice.invoice_number} (₹{outstanding:,.2f}). "
+                    f"We noticed the promised payment date ({c_date_str}) has passed. "
+                    f"Please settle your balance immediately at: {pay_link}"
+                )
+        elif past_messages_count > 0:
+            if lang == "Hindi":
+                outreach_text = (
+                    f"नमस्ते {customer.name} जी, {business_name} की ओर से इनवॉइस {invoice.invoice_number} (राशि ₹{outstanding:,.2f}) का आवश्यक स्मरण पत्र। "
+                    f"यह बिल {days_overdue} दिनों से बकाया है। असुविधा और लेट फीस से बचने के लिए अभी भुगतान करें: {pay_link}"
+                )
+            else:
+                outreach_text = (
+                    f"Hello {customer.name}, urgent follow-up from {business_name} regarding invoice {invoice.invoice_number} (₹{outstanding:,.2f}), "
+                    f"now {days_overdue} days overdue. Please clear the pending dues securely at: {pay_link}"
+                )
+        else:
+            # First Outreach
+            if lang == "Hindi":
+                outreach_text = (
+                    f"नमस्ते {customer.name} जी, {business_name} से इनवॉइस {invoice.invoice_number} की बकाया राशि ₹{outstanding:,.2f} है "
+                    f"(नियत तिथि: {due_date.strftime('%d %b %Y') if due_date else 'तत्काल'})। "
+                    f"कृपया Paytm UPI द्वारा इस सुरक्षित लिंक से भुगतान करें: {pay_link}"
+                )
+            else:
+                outreach_text = (
+                    f"Hello {customer.name}, reminder from {business_name} regarding invoice {invoice.invoice_number} for ₹{outstanding:,.2f} "
+                    f"(Due: {due_date.strftime('%d %b %Y') if due_date else 'overdue'}). "
+                    f"Please settle securely via Paytm UPI: {pay_link}"
+                )
+
+        # 8. Policy Check Tag (Manual trigger bypasses curfew)
+        case._is_manual_trigger = True
+        settings._is_manual_trigger = True
+        action_type = ActionType.CALL if channel == "VOICE" else ActionType.TEXT
+
+        # 9. Execute Outbound Outreach via Twilio
+        delivery_result = {}
+        if action_type == ActionType.CALL:
+            delivery_result = await twilio_adapter.initiate_voice_call(
+                to_phone=customer.phone,
+                say_text=outreach_text,
+            )
+        else:
+            delivery_result = await twilio_adapter.send_whatsapp_message(
+                to_phone=customer.phone,
+                message=outreach_text,
+            )
+
+        # 10. Record Conversation Message in DB
+        agent_msg = Message(
+            conversation_id=conv.id,
+            sender_type="AGENT",
+            channel=channel,
+            content=outreach_text,
+            delivery_status=delivery_result.get("status", "DELIVERED"),
+        )
+        session.add(agent_msg)
+
+        # 11. Record Action in DB
+        action_rec = Action(
+            case_id=case.id,
+            action_type=action_type.value,
+            channel=channel,
+            status=delivery_result.get("status", "DELIVERED"),
+            provider=delivery_result.get("provider", "TWILIO"),
+            provider_reference=delivery_result.get("provider_message_id") or delivery_result.get("provider_call_id"),
+            payload={"message": outreach_text, "channel": channel},
+            executed_at=datetime.now(timezone.utc),
+            completed_at=datetime.now(timezone.utc),
+        )
+        session.add(action_rec)
+
+        # 12. Update Case State Machine
+        if case.status == CaseStatus.NEW.value:
+            CaseStateMachine.transition(case, CaseStatus.CONTACTED)
+
+        # 13. Update Cognee Durable Memory
+        await cognee_adapter.add_interaction_memory(
+            merchant_id=case.merchant_id,
+            customer_id=customer.id,
+            case_id=case.id,
+            interaction_summary=f"Automated {channel} outreach dispatched. Amount: ₹{outstanding}. Days overdue: {days_overdue}. Message: '{outreach_text[:60]}...'",
+        )
+
+        await session.commit()
+        await session.refresh(case)
+
+        return {
+            "success": True,
+            "case_id": case.id,
+            "customer_name": customer.name,
+            "phone": customer.phone,
+            "channel": channel,
+            "action_type": action_type.value,
+            "analysis": {
+                "outstanding_amount": outstanding,
+                "days_overdue": days_overdue,
+                "past_commitments_count": len(commitments),
+                "has_broken_commitment": bool(broken_commitment),
+                "past_messages_count": past_messages_count,
+                "severity": "CRITICAL" if days_overdue > 30 else ("OVERDUE" if days_overdue > 7 else "RECENT"),
+                "memory_facts_retrieved": len(memory_ctx.get("facts", [])),
+                "memory_summary": memory_ctx.get("summary"),
+            },
+            "agent_message": outreach_text,
+            "delivery_status": delivery_result.get("status", "DELIVERED"),
+            "provider": delivery_result.get("provider", "TWILIO"),
+            "provider_reference": delivery_result.get("provider_message_id") or delivery_result.get("provider_call_id"),
+            "case_status": case.status,
+        }
+
 
 collections_agent = CollectionsAgent()

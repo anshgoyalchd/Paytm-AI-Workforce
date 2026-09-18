@@ -12,20 +12,50 @@ import {
   ChevronRight,
   Plus,
   FileText,
-  UploadCloud
+  UploadCloud,
+  Zap,
+  RefreshCw
 } from 'lucide-react';
 import { CollectionCase, CaseStatus } from '../types';
+import { api } from '../services/api';
 
 interface CasesListProps {
   cases: CollectionCase[];
   onSelectCase: (caseItem: CollectionCase) => void;
   isLoading: boolean;
   onAddCaseClick?: () => void;
+  onCaseUpdated?: () => void;
 }
 
-export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoading, onAddCaseClick }) => {
+export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoading, onAddCaseClick, onCaseUpdated }) => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [reachingCaseId, setReachingCaseId] = useState<string | null>(null);
+  const [recentActionNotice, setRecentActionNotice] = useState<{ id: string; text: string; success: boolean } | null>(null);
+
+  const handleQuickAutoReach = async (e: React.MouseEvent, c: CollectionCase) => {
+    e.stopPropagation();
+    try {
+      setReachingCaseId(c.id);
+      const res = await api.triggerAutoReach(c.id);
+      setRecentActionNotice({
+        id: c.id,
+        text: res.action_summary || 'Outreach dispatched successfully via Twilio!',
+        success: res.success
+      });
+      if (onCaseUpdated) {
+        onCaseUpdated();
+      }
+    } catch (err: any) {
+      setRecentActionNotice({
+        id: c.id,
+        text: err.response?.data?.detail || err.message || 'Failed to dispatch touch',
+        success: false
+      });
+    } finally {
+      setReachingCaseId(null);
+    }
+  };
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -153,6 +183,24 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
         </div>
       </div>
 
+      {/* Autonomous Action Feedback Notice */}
+      {recentActionNotice && (
+        <div className={`p-3 rounded-lg text-xs flex items-center justify-between border ${
+          recentActionNotice.success ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'
+        }`}>
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span className="font-medium">{recentActionNotice.text}</span>
+          </div>
+          <button
+            onClick={() => setRecentActionNotice(null)}
+            className="text-[11px] underline ml-3 text-slate-500 hover:text-slate-800"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Cases Table */}
       <div className="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-xs">
         <table className="w-full text-left border-collapse">
@@ -246,16 +294,41 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
 
                   {/* Actions */}
                   <td className="py-3 px-4 text-right">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onSelectCase(caseItem);
-                      }}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
-                    >
-                      <span>View Dossier</span>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={(e) => handleQuickAutoReach(e, caseItem)}
+                        disabled={reachingCaseId === caseItem.id || caseItem.status === 'SETTLED'}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-2xs ${
+                          caseItem.status === 'SETTLED'
+                            ? 'opacity-40 cursor-not-allowed bg-slate-100 text-slate-400'
+                            : 'bg-blue-50 hover:bg-blue-100 text-[#002970] border border-blue-200 hover:border-blue-300'
+                        }`}
+                        title="Run 1-Click Autonomous Outreach (Twilio Voice/WhatsApp + Cognee memory)"
+                      >
+                        {reachingCaseId === caseItem.id ? (
+                          <>
+                            <RefreshCw className="w-3 h-3 animate-spin text-blue-700" />
+                            <span>Reaching...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-3 h-3 text-amber-500 fill-amber-400" />
+                            <span>Auto Reach</span>
+                          </>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectCase(caseItem);
+                        }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
+                      >
+                        <span>Dossier</span>
+                        <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

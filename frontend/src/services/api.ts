@@ -119,6 +119,23 @@ export const api = {
     return res.data;
   },
 
+  async triggerAutoReach(caseId: string, channel?: string): Promise<any> {
+    const params: Record<string, string> = {};
+    if (channel) params.channel = channel;
+    const res = await apiClient.post(`${API_BASE}/cases/${caseId}/auto-reach`, null, { params });
+    return res.data;
+  },
+
+  async triggerAutoReachAll(): Promise<any> {
+    const res = await apiClient.post(`${API_BASE}/cases/auto-reach-all`);
+    return res.data;
+  },
+
+  async getCogneeHealth(): Promise<any> {
+    const res = await apiClient.get(`${API_BASE}/analytics/cognee-health`);
+    return res.data;
+  },
+
   // Escalations
   async getEscalations(status?: string): Promise<Escalation[]> {
     const params: Record<string, string> = {};

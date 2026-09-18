@@ -143,6 +143,7 @@ export const App: React.FC = () => {
             onSelectCase={(c) => setSelectedCaseId(c.id)}
             isLoading={isLoading}
             onAddCaseClick={() => setIsAddCaseOpen(true)}
+            onCaseUpdated={loadAllData}
           />
         )}
 

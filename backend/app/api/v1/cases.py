@@ -150,6 +150,76 @@ async def trigger_agent_turn(
     return result
 
 
+@router.post("/{case_id}/auto-reach")
+async def trigger_autonomous_reach(
+    case_id: str,
+    channel: Optional[str] = None,
+    current_user: CurrentUserContext = Depends(get_current_user_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    1-Click Autonomous Outreach:
+    Analyzes due amount, previous history, past commitments, and Cognee memory,
+    then automatically dispatches WhatsApp message or initiates Voice call to the debtor.
+    """
+    # Verify tenant ownership
+    case_stmt = select(CollectionCase).where(
+        CollectionCase.id == case_id,
+        CollectionCase.merchant_id == current_user.merchant_id,
+    )
+    res = await db.execute(case_stmt)
+    case = res.scalar_one_or_none()
+    if not case:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Case not found")
+
+    try:
+        result = await collections_agent.run_autonomous_outreach(
+            session=db,
+            case_id=case_id,
+            preferred_channel=channel,
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+
+
+@router.post("/auto-reach-all")
+async def trigger_autonomous_reach_all(
+    current_user: CurrentUserContext = Depends(get_current_user_context),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    1-Click Bulk Portfolio Outreach:
+    Runs autonomous analysis and outbound contact across all pending/contactable cases.
+    """
+    cases_stmt = select(CollectionCase).where(
+        CollectionCase.merchant_id == current_user.merchant_id,
+        CollectionCase.status.in_(["NEW", "CONTACTED", "PROMISE_TO_PAY"]),
+    )
+    cases = (await db.execute(cases_stmt)).scalars().all()
+
+    results = []
+    for c in cases:
+        try:
+            res = await collections_agent.run_autonomous_outreach(
+                session=db,
+                case_id=c.id,
+            )
+            results.append(res)
+        except Exception as e:
+            results.append({
+                "case_id": c.id,
+                "success": False,
+                "error": str(e),
+            })
+
+    return {
+        "total_processed": len(cases),
+        "successful_touches": sum(1 for r in results if r.get("success")),
+        "results": results,
+    }
+
+
 @router.post("", response_model=CaseRead, status_code=status.HTTP_201_CREATED)
 async def create_case(
     req: CaseCreateRequest,
