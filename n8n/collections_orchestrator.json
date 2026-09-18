@@ -20,9 +20,7 @@
     },
     {
       "parameters": {
-        "url": "http://localhost:8000/api/v1/cases?status=NEW",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "url": "https://paytm-collections-backend.onrender.com/api/v1/cases?status=NEW",
         "options": {}
       },
       "id": "fetch-new-cases",
@@ -34,7 +32,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "=http://localhost:8000/api/v1/cases/{{$json.id}}/trigger-turn",
+        "url": "=https://paytm-collections-backend.onrender.com/api/v1/cases/{{$json.id}}/trigger-turn",
         "options": {}
       },
       "id": "trigger-agent-loop",
@@ -62,13 +60,16 @@
     },
     {
       "parameters": {
-        "content": "=🚨 High-Priority Escalation Alert: Case {{$json.case_id}} escalated. Reason: {{$json.decision_reason}}",
-        "options": {}
+        "chatId": "={{ $json.chat_id || 'YOUR_TELEGRAM_CHAT_ID' }}",
+        "text": "=?? *High-Priority Escalation Alert*\n\nCase ID: `{{$json.case_id}}`\nCustomer: {{$json.customer_name || 'Customer'}}\nReason: *{{$json.decision_reason}}*\n\nAction Required: Human collections manager review needed on Paytm Collections Dashboard.",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
       },
-      "id": "notify-escalation-team",
-      "name": "Notify Escalation Team",
-      "type": "n8n-nodes-base.discord",
-      "typeVersion": 2,
+      "id": "notify-telegram",
+      "name": "Notify Escalation Team (Telegram)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
       "position": [1050, 200]
     }
   ],
@@ -110,7 +111,7 @@
       "main": [
         [
           {
-            "node": "Notify Escalation Team",
+            "node": "Notify Escalation Team (Telegram)",
             "type": "main",
             "index": 0
           }
