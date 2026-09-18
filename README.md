@@ -4,6 +4,13 @@
 
 > A fully functional autonomous AI employee that helps businesses recover pending payments by understanding cases, remembering customer context, choosing the appropriate communication channel, communicating with customers, verifying outcomes, scheduling follow-ups, and escalating cases when required.
 
+## ☁️ 1-Click Cloud Deployment
+
+| Component | Platform | Deployment Action |
+| :--- | :--- | :--- |
+| **Backend API** | Render | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/anshgoyalchd/Paytm-AI-Workforce) |
+| **Frontend UI** | Cloudflare Pages | [Deploy on Cloudflare Pages](https://dash.cloudflare.com/?to=/:account/pages/new) (Connect GitHub repo `anshgoyalchd/Paytm-AI-Workforce`, set root to `frontend`) |
+
 ---
 
 ## ⚡ Quickstart & Execution Guide
