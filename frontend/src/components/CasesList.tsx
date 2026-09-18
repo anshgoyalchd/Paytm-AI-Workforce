@@ -49,25 +49,25 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
   const getStatusBadge = (status: CaseStatus) => {
     switch (status) {
       case 'NEW':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-500/10 text-paytm-cyan border border-sky-500/20">NEW</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">NEW</span>;
       case 'CONTACT_ATTEMPTED':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">ATTEMPTED</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">ATTEMPTED</span>;
       case 'CONTACTED':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">CONTACTED</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-sky-50 text-sky-700 border border-sky-200">CONTACTED</span>;
       case 'PROMISE_TO_PAY':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">PROMISE TO PAY</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">PROMISE TO PAY</span>;
       case 'DISPUTED':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">DISPUTED</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200">DISPUTED</span>;
       case 'ESCALATED':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/15 text-red-400 border border-red-500/30">ESCALATED</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-red-50 text-red-700 border border-red-200">ESCALATED</span>;
       case 'PAYMENT_PENDING':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">PENDING CONFIRMATION</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">PENDING CONFIRMATION</span>;
       case 'SETTLED':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">SETTLED</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">SETTLED</span>;
       case 'CLOSED':
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-400 border border-slate-700">CLOSED</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600 border border-slate-200">CLOSED</span>;
       default:
-        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-300">{status}</span>;
+        return <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">{status}</span>;
     }
   };
 
@@ -75,29 +75,29 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
     switch (priority) {
       case 'HIGH':
       case 'URGENT':
-        return <span className="text-[10px] font-bold text-rose-400">HIGH</span>;
+        return <span className="text-[10px] font-semibold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded">HIGH</span>;
       case 'MEDIUM':
-        return <span className="text-[10px] font-medium text-amber-400">MED</span>;
+        return <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">MED</span>;
       default:
-        return <span className="text-[10px] font-normal text-slate-400">LOW</span>;
+        return <span className="text-[10px] font-normal text-slate-600 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">LOW</span>;
     }
   };
 
   // Dedicated empty state for new merchants
   if (!isLoading && cases.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800/80 my-4">
-        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500/10 to-blue-600/10 border border-sky-500/20 flex items-center justify-center mb-4">
-          <FileText className="w-8 h-8 text-sky-400" />
+      <div className="flex flex-col items-center justify-center p-12 text-center rounded-xl bg-white border border-slate-200 my-4 shadow-xs">
+        <div className="w-14 h-14 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-4 text-[#002970]">
+          <FileText className="w-7 h-7" />
         </div>
-        <h3 className="text-lg font-bold text-white mb-2">No Overdue Invoices Found</h3>
-        <p className="text-sm text-slate-400 max-w-md mb-6 leading-relaxed">
+        <h3 className="text-base font-bold text-slate-900 mb-1.5">No Overdue Invoices Found</h3>
+        <p className="text-xs text-slate-500 max-w-md mb-5 leading-relaxed">
           Your collection portfolio is clean! Add overdue customer invoices or upload a CSV spreadsheet to let the autonomous AI workforce begin debt recovery.
         </p>
         {onAddCaseClick && (
           <button
             onClick={onAddCaseClick}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold text-sm shadow-lg shadow-sky-500/25 transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#002970] hover:bg-[#001f54] text-white font-medium text-xs shadow-xs transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>+ Add Your First Overdue Invoice</span>
@@ -112,15 +112,15 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
       {/* Action Bar & Search & Filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Filter Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-slate-800">
+        <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-lg bg-white border border-slate-200 shadow-xs">
           {['ALL', 'NEW', 'CONTACTED', 'PROMISE_TO_PAY', 'DISPUTED', 'ESCALATED', 'SETTLED'].map((s) => (
             <button
               key={s}
               onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium transition-all ${
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${
                 statusFilter === s
-                  ? 'bg-paytm-blue text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? 'bg-[#002970] text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
               {s.replace('_', ' ')}
@@ -131,20 +131,20 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
         {/* Search & Add Action */}
         <div className="flex items-center gap-2.5">
           <div className="relative min-w-[240px]">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search customer, phone, invoice..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-slate-900/60 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-paytm-cyan"
+              className="w-full pl-9 pr-4 py-2 rounded-lg text-xs bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
             />
           </div>
 
           {onAddCaseClick && (
             <button
               onClick={onAddCaseClick}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs shadow-md shadow-sky-500/20 transition-all shrink-0"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#002970] hover:bg-[#001f54] text-white font-medium text-xs shadow-xs transition-all shrink-0"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>+ Add Invoice</span>
@@ -154,10 +154,10 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
       </div>
 
       {/* Cases Table */}
-      <div className="overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800">
+      <div className="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-xs">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="border-b border-slate-800 bg-slate-950/40 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <tr className="border-b border-slate-200 bg-slate-50 text-[11px] font-semibold text-slate-600 uppercase tracking-wider">
               <th className="py-3 px-4">Customer</th>
               <th className="py-3 px-4">Invoice Details</th>
               <th className="py-3 px-4">Overdue Amount</th>
@@ -167,16 +167,16 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/60 text-xs">
+          <tbody className="divide-y divide-slate-100 text-xs">
             {isLoading ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-slate-500">
+                <td colSpan={7} className="py-8 text-center text-slate-400">
                   Loading portfolio cases...
                 </td>
               </tr>
             ) : filteredCases.length === 0 ? (
               <tr>
-                <td colSpan={7} className="py-8 text-center text-slate-500">
+                <td colSpan={7} className="py-8 text-center text-slate-400">
                   No cases found matching filter criteria.
                 </td>
               </tr>
@@ -184,35 +184,35 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
               filteredCases.map((caseItem) => (
                 <tr 
                   key={caseItem.id} 
-                  className="hover:bg-slate-800/30 transition-colors group cursor-pointer"
+                  className="hover:bg-slate-50/80 transition-colors group cursor-pointer"
                   onClick={() => onSelectCase(caseItem)}
                 >
                   {/* Customer */}
                   <td className="py-3 px-4">
-                    <div className="font-semibold text-slate-200 group-hover:text-paytm-cyan transition-colors">
+                    <div className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
                       {caseItem.customer?.name || 'Unknown Customer'}
                     </div>
-                    <div className="text-[11px] text-slate-400">
+                    <div className="text-[11px] text-slate-500">
                       {caseItem.customer?.phone} • {caseItem.customer?.preferred_language}
                     </div>
                   </td>
 
                   {/* Invoice */}
                   <td className="py-3 px-4">
-                    <div className="font-mono text-slate-300">
+                    <div className="font-mono text-slate-700">
                       {caseItem.invoice?.invoice_number || 'N/A'}
                     </div>
-                    <div className="text-[11px] text-slate-500">
+                    <div className="text-[11px] text-slate-400">
                       Opened {new Date(caseItem.opened_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
                     </div>
                   </td>
 
                   {/* Amount */}
                   <td className="py-3 px-4">
-                    <div className="font-bold text-white">
+                    <div className="font-bold text-slate-900">
                       {formatCurrency(caseItem.outstanding_amount)}
                     </div>
-                    <div className="text-[10px] text-slate-400">
+                    <div className="text-[10px] text-slate-500">
                       {caseItem.status === 'SETTLED' ? 'Cleared' : 'Due Balance'}
                     </div>
                   </td>
@@ -229,15 +229,15 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
 
                   {/* Channel */}
                   <td className="py-3 px-4">
-                    <div className="flex items-center gap-1.5 text-slate-400">
+                    <div className="flex items-center gap-1.5 text-slate-600">
                       {caseItem.customer?.preferred_channel === 'VOICE' ? (
                         <>
-                          <PhoneCall className="w-3.5 h-3.5 text-sky-400" />
+                          <PhoneCall className="w-3.5 h-3.5 text-blue-600" />
                           <span>Voice Call</span>
                         </>
                       ) : (
                         <>
-                          <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                          <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
                           <span>WhatsApp</span>
                         </>
                       )}
@@ -251,7 +251,7 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
                         e.stopPropagation();
                         onSelectCase(caseItem);
                       }}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 transition-all"
                     >
                       <span>View Dossier</span>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-400" />

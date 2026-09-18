@@ -37,24 +37,24 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
 
   return (
     <div className="space-y-6">
-      {/* Top Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-paytm-dark via-paytm-navy to-slate-900 border border-slate-800 p-6 shadow-xl">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      {/* Top Summary Card */}
+      <div className="rounded-xl bg-white border border-slate-200 p-6 shadow-xs">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <h2 className="text-xl font-bold text-white tracking-tight">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+              <h2 className="text-lg font-bold text-slate-900 tracking-tight">
                 Autonomous Collections Employee #01
               </h2>
             </div>
-            <p className="text-sm text-slate-300 max-w-2xl">
-              Operating continuously within RBI & Paytm fair practice guardrails. Actively evaluating customer payment intents, verifying receipts against payment gateways, and escalating disputes autonomously.
+            <p className="text-xs text-slate-600 max-w-2xl leading-relaxed">
+              Operating continuously within RBI and Paytm fair recovery practice guardrails. Actively evaluates customer payment intents, verifies receipts against payment gateways, and escalates disputes autonomously.
             </p>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => onNavigateTab('simulator')}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold bg-paytm-cyan text-slate-950 hover:bg-sky-400 transition-all shadow-lg shadow-sky-500/20"
+              className="flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold bg-[#002970] text-white hover:bg-[#001f54] transition-all shadow-xs"
             >
               <span>Test Simulator (8 Scenarios)</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -66,76 +66,76 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
       {/* Primary KPI Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Active Outstanding */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm">
+        <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Total Outstanding</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+            <span className="text-xs font-medium text-slate-500">Total Outstanding</span>
+            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
               <IndianRupee className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-white tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
               {formatCurrency(overview.total_outstanding)}
             </div>
-            <div className="mt-1 flex items-center text-xs text-slate-400">
-              <span className="text-amber-400 font-medium">{overview.active_cases} Active Cases</span>
-              <span className="mx-1.5 text-slate-600">•</span>
+            <div className="mt-1 flex items-center text-xs text-slate-500">
+              <span className="text-amber-700 font-medium">{overview.active_cases} Active Cases</span>
+              <span className="mx-1.5 text-slate-300">•</span>
               <span>Portfolio balance</span>
             </div>
           </div>
         </div>
 
         {/* Card 2: Recovered */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm">
+        <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Recovered to Date</span>
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+            <span className="text-xs font-medium text-slate-500">Recovered to Date</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-white tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
               {formatCurrency(overview.total_recovered)}
             </div>
-            <div className="mt-1 flex items-center text-xs text-slate-400">
-              <span className="text-emerald-400 font-medium">{overview.settled_cases} Cases Settled</span>
-              <span className="mx-1.5 text-slate-600">•</span>
+            <div className="mt-1 flex items-center text-xs text-slate-500">
+              <span className="text-emerald-700 font-medium">{overview.settled_cases} Cases Settled</span>
+              <span className="mx-1.5 text-slate-300">•</span>
               <span>100% verified</span>
             </div>
           </div>
         </div>
 
         {/* Card 3: Recovery Rate */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm">
+        <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Recovery Rate</span>
-            <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-paytm-cyan flex items-center justify-center">
+            <span className="text-xs font-medium text-slate-500">Recovery Rate</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-white tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
               {overview.recovery_rate_pct}%
             </div>
-            <div className="mt-1 flex items-center text-xs text-slate-400">
+            <div className="mt-1 flex items-center text-xs text-slate-500">
               <span>Settled / Total Cases</span>
             </div>
           </div>
         </div>
 
         {/* Card 4: Policy Adherence */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 backdrop-blur-sm">
+        <div className="p-5 rounded-xl bg-white border border-slate-200 shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-400">Policy Compliance</span>
-            <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
+            <span className="text-xs font-medium text-slate-500">Policy Compliance</span>
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center">
               <ShieldCheck className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl font-bold text-white tracking-tight">
+            <div className="text-2xl font-bold text-slate-900 tracking-tight">
               {overview.governance.compliance_adherence_pct}%
             </div>
-            <div className="mt-1 flex items-center text-xs text-emerald-400">
+            <div className="mt-1 flex items-center text-xs text-emerald-700 font-medium">
               <span>0 Unauthorized Outbound Actions</span>
             </div>
           </div>
@@ -145,56 +145,56 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
       {/* Secondary Dashboard Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Operations Breakdown */}
-        <div className="lg:col-span-2 p-6 rounded-2xl bg-slate-900/60 border border-slate-800">
-          <h3 className="text-sm font-semibold text-white tracking-tight mb-4 flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-paytm-cyan" />
-            Autonomous Decision & Touchpoint Volume
+        <div className="lg:col-span-2 p-6 rounded-xl bg-white border border-slate-200 shadow-xs">
+          <h3 className="text-sm font-semibold text-slate-900 tracking-tight mb-4 flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-blue-600" />
+            <span>Autonomous Decision & Touchpoint Volume</span>
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <MessageSquare className="w-3.5 h-3.5 text-emerald-600" />
                 <span>WhatsApp Touches</span>
               </div>
-              <div className="mt-2 text-xl font-bold text-white">
+              <div className="mt-2 text-xl font-bold text-slate-900">
                 {overview.actions_taken.whatsapp_sent}
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <PhoneCall className="w-3.5 h-3.5 text-sky-400" />
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <PhoneCall className="w-3.5 h-3.5 text-blue-600" />
                 <span>Voice Telephony Calls</span>
               </div>
-              <div className="mt-2 text-xl font-bold text-white">
+              <div className="mt-2 text-xl font-bold text-slate-900">
                 {overview.actions_taken.calls_completed}
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80">
-              <div className="flex items-center gap-2 text-xs text-slate-400">
-                <AlertCircle className="w-3.5 h-3.5 text-rose-400" />
+            <div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-600" />
                 <span>Escalated to Human</span>
               </div>
-              <div className="mt-2 text-xl font-bold text-white">
+              <div className="mt-2 text-xl font-bold text-slate-900">
                 {overview.escalated_cases}
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800/60 flex items-center justify-between">
+          <div className="p-4 rounded-lg bg-blue-50/60 border border-blue-100 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-sky-500/10 text-paytm-cyan flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
               <div className="text-xs">
-                <div className="font-semibold text-slate-200">Legal Contact Operating Window</div>
-                <div className="text-slate-400">09:00 - 19:00 IST (Strictly enforced by deterministic policy rules)</div>
+                <div className="font-semibold text-slate-800">Legal Contact Operating Window</div>
+                <div className="text-slate-600">09:00 - 19:00 IST (Strictly enforced by deterministic policy rules)</div>
               </div>
             </div>
             <button
               onClick={() => onNavigateTab('governance')}
-              className="text-xs font-medium text-paytm-cyan hover:underline"
+              className="text-xs font-medium text-blue-700 hover:text-blue-900 hover:underline"
             >
               Configure Policy
             </button>
@@ -202,12 +202,12 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
         </div>
 
         {/* Quick Launch Test Bench */}
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col justify-between">
+        <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
           <div>
-            <h3 className="text-sm font-semibold text-white tracking-tight mb-2">
+            <h3 className="text-sm font-semibold text-slate-900 tracking-tight mb-2">
               Interactive Test Simulator
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-500 mb-4 leading-relaxed">
               Evaluate how the collections employee responds to all 8 standard customer scenarios (disputes, promise to pay, hardship, already paid).
             </p>
             <div className="space-y-2">
@@ -219,10 +219,10 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
               ].map((item, idx) => (
                 <div 
                   key={idx}
-                  className="flex items-center justify-between p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 text-xs"
+                  className="flex items-center justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs"
                 >
-                  <span className="text-slate-300 font-medium">{item.name}</span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">
+                  <span className="text-slate-700 font-medium">{item.name}</span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white border border-slate-200 text-slate-600">
                     {item.tag}
                   </span>
                 </div>
@@ -231,7 +231,7 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
           </div>
           <button
             onClick={() => onNavigateTab('simulator')}
-            className="w-full mt-4 py-2.5 px-4 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 transition-all text-center"
+            className="w-full mt-4 py-2 px-4 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-all text-center"
           >
             Launch Scenario Runner
           </button>

@@ -115,7 +115,7 @@ export const App: React.FC = () => {
   const pendingEscalationsCount = escalations.filter((e) => e.status === 'OPEN').length;
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-paytm-cyan selection:text-paytm-dark">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">
       {/* Top Navigation */}
       <Navbar
         currentTab={currentTab}
@@ -190,10 +190,10 @@ export const App: React.FC = () => {
       )}
 
       {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950/60 py-4 text-center text-xs text-slate-500">
+      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <span>Paytm AI Workforce — Autonomous Collections Agent #01 (Track 2: AI Teammates)</span>
-          <span className="font-mono text-[11px] text-slate-600">Multi-Tenant Production SaaS • Real Overdue Invoices • Gemini Flash</span>
+          <span className="font-mono text-[11px] text-slate-500">Multi-Tenant Production SaaS • Real Overdue Invoices • Gemini Flash</span>
         </div>
       </footer>
     </div>

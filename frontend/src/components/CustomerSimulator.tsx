@@ -69,21 +69,21 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
   return (
     <div className="space-y-6">
       {/* Simulator Header */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-paytm-dark via-slate-900 to-slate-950 border border-slate-800">
+      <div className="p-6 rounded-xl bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-paytm-cyan" />
-              <h2 className="text-lg font-bold text-white tracking-tight">
+              <Sparkles className="w-5 h-5 text-blue-600" />
+              <h2 className="text-base font-bold text-slate-900 tracking-tight">
                 Autonomous Collections Scenario Simulator
               </h2>
             </div>
-            <p className="text-xs text-slate-400 mt-1 max-w-2xl">
+            <p className="text-xs text-slate-500 mt-1 max-w-2xl">
               Simulate end-to-end customer interactions across all 8 canonical collection scenarios. Trace the entire autonomous employee loop in real time with explicit deterministic guardrails.
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-1 rounded-lg text-xs font-mono bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="px-2.5 py-1 rounded-md text-xs font-mono bg-amber-50 text-amber-800 border border-amber-200 font-medium">
               [MOCKED PAYMENT GATEWAY ACTIVE]
             </span>
           </div>
@@ -93,7 +93,7 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Scenarios Catalog (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
             1. Select Customer Scenario (8 Scenarios)
           </h3>
           <div className="space-y-2 max-h-[620px] overflow-y-auto pr-1">
@@ -105,19 +105,19 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
                   onClick={() => handleSelectScenario(sc)}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                     isSelected
-                      ? 'bg-paytm-blue/20 border-paytm-cyan shadow-md shadow-sky-500/5'
-                      : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
+                      ? 'bg-blue-50/70 border-blue-600 shadow-xs'
+                      : 'bg-white border-slate-200 hover:border-slate-300'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs font-bold ${isSelected ? 'text-paytm-cyan' : 'text-slate-200'}`}>
+                    <span className={`text-xs font-bold ${isSelected ? 'text-blue-800' : 'text-slate-900'}`}>
                       {sc.title}
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-950 text-slate-400 border border-slate-800">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200 font-medium">
                       {sc.expected_action}
                     </span>
                   </div>
-                  <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">
+                  <p className="text-[11px] text-slate-500 mt-1 line-clamp-2">
                     {sc.description}
                   </p>
                 </div>
@@ -129,18 +129,18 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
         {/* Right Column: Runner & Trace (7 cols) */}
         <div className="lg:col-span-7 space-y-4">
           {/* Target Account Selector */}
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-3">
-            <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <div className="p-4 rounded-xl bg-white border border-slate-200 shadow-xs space-y-3">
+            <h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
               2. Target Portfolio Account & Prompt
             </h3>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="text-slate-400 block mb-1">Target Case:</label>
+                <label className="text-slate-600 block mb-1 font-medium">Target Case:</label>
                 <select
                   value={selectedCaseId}
                   onChange={(e) => setSelectedCaseId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-paytm-cyan"
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
                 >
                   {cases.map((c) => (
                     <option key={c.id} value={c.id}>
@@ -151,27 +151,27 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
               </div>
 
               <div>
-                <label className="text-slate-400 block mb-1">Channel:</label>
-                <div className="px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 font-mono text-xs">
+                <label className="text-slate-600 block mb-1 font-medium">Channel:</label>
+                <div className="px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 font-mono text-xs">
                   WHATSAPP / SMS (Simulated)
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="text-slate-400 block mb-1 text-xs">Simulated Customer Input:</label>
+              <label className="text-slate-600 block mb-1 text-xs font-medium">Simulated Customer Input:</label>
               <textarea
                 rows={2}
                 value={customMessage}
                 onChange={(e) => setCustomMessage(e.target.value)}
-                className="w-full p-3 rounded-xl text-xs bg-slate-950 border border-slate-800 text-slate-200 focus:outline-none focus:border-paytm-cyan"
+                className="w-full p-3 rounded-lg text-xs bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
               />
             </div>
 
             <button
               onClick={handleRunSimulation}
               disabled={isLoading || !selectedCaseId}
-              className="w-full py-2.5 rounded-xl text-xs font-semibold bg-paytm-cyan text-slate-950 hover:bg-sky-400 disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-sky-500/10"
+              className="w-full py-2.5 rounded-lg text-xs font-semibold bg-[#002970] text-white hover:bg-[#001f54] disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer"
             >
               {isLoading ? (
                 <>
@@ -189,15 +189,15 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
 
           {/* Trace Results */}
           {result && (
-            <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-4 shadow-xl">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+            <div className="p-5 rounded-xl bg-white border border-slate-200 space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-slate-200 pb-3">
                 <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-bold text-slate-900 uppercase tracking-wider">
                     Autonomous Employee Execution Trace
                   </span>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                   Status After: {result.case_status_after}
                 </span>
               </div>
@@ -205,35 +205,35 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
               {/* 7 Loop Steps Visualization */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                 {/* Step 1: Understand */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="text-slate-500 font-semibold text-[10px] uppercase tracking-wider">Step 1: Understand</div>
-                  <div className="mt-1 font-bold text-slate-200">
-                    Intent: <span className="text-paytm-cyan">{result.detected_intent}</span>
+                  <div className="mt-1 font-bold text-slate-900">
+                    Intent: <span className="text-blue-700">{result.detected_intent}</span>
                   </div>
                 </div>
 
                 {/* Step 2: Decide */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="text-slate-500 font-semibold text-[10px] uppercase tracking-wider">Step 2: Decide</div>
-                  <div className="mt-1 font-bold text-slate-200">
-                    Next Action: <span className="text-emerald-400">{result.agent_decision}</span>
+                  <div className="mt-1 font-bold text-slate-900">
+                    Next Action: <span className="text-emerald-700">{result.agent_decision}</span>
                   </div>
                 </div>
 
                 {/* Step 3: Verify (Mock Payment Gateway) */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="text-slate-500 font-semibold text-[10px] uppercase tracking-wider">Step 3: Gateway Verification</div>
-                  <div className="mt-1 font-bold text-slate-200 flex items-center justify-between">
+                  <div className="mt-1 font-bold text-slate-900 flex items-center justify-between">
                     <span>Result: {result.verification_status || 'NOT_TRIGGERED'}</span>
-                    <span className="text-[10px] font-mono text-amber-400">[MOCKED PG]</span>
+                    <span className="text-[10px] font-mono text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">[MOCKED PG]</span>
                   </div>
                 </div>
 
                 {/* Step 4: Authorize (Policy Engine) */}
-                <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800">
+                <div className="p-3 rounded-lg bg-slate-50 border border-slate-200">
                   <div className="text-slate-500 font-semibold text-[10px] uppercase tracking-wider">Step 4: Policy Engine</div>
-                  <div className="mt-1 font-bold text-slate-200">
-                    Compliance: <span className={result.policy_check.is_allowed ? 'text-emerald-400' : 'text-rose-400'}>
+                  <div className="mt-1 font-bold text-slate-900">
+                    Compliance: <span className={result.policy_check.is_allowed ? 'text-emerald-700' : 'text-rose-700'}>
                       {result.policy_check.is_allowed ? 'AUTHORIZED' : 'BLOCKED'}
                     </span>
                   </div>
@@ -241,20 +241,20 @@ export const CustomerSimulator: React.FC<SimulatorProps> = ({ cases }) => {
               </div>
 
               {/* Step 5: Generated Agent Outbound Message */}
-              <div className="p-3.5 rounded-xl bg-paytm-blue/15 border border-paytm-cyan/30 text-xs">
-                <div className="text-[10px] font-semibold text-paytm-cyan uppercase tracking-wider mb-1">
+              <div className="p-3.5 rounded-lg bg-blue-50/70 border border-blue-200 text-xs">
+                <div className="text-[10px] font-semibold text-blue-800 uppercase tracking-wider mb-1">
                   Step 5: Generated Outbound Customer Response
                 </div>
-                <div className="text-white text-xs leading-relaxed">
+                <div className="text-slate-900 text-xs leading-relaxed font-medium">
                   {result.agent_response}
                 </div>
               </div>
 
               {/* Step 6: Escalation & Memory */}
-              <div className="flex items-center justify-between text-xs pt-1 text-slate-400">
+              <div className="flex items-center justify-between text-xs pt-1 text-slate-600">
                 <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-slate-300">Escalated to Human:</span>
-                  <span className={result.escalated ? 'text-rose-400 font-bold' : 'text-emerald-400 font-bold'}>
+                  <span className="font-semibold text-slate-700">Escalated to Human:</span>
+                  <span className={result.escalated ? 'text-rose-700 font-bold' : 'text-emerald-700 font-bold'}>
                     {result.escalated ? 'YES (Queue Alerted)' : 'NO (Fully Autonomous)'}
                   </span>
                 </div>
