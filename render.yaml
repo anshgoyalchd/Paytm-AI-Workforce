@@ -35,11 +35,27 @@ services:
         value: "+17372508034"
       - key: TWILIO_WHATSAPP_NUMBER
         value: "whatsapp:+17372508034"
+      - key: COGNEE_API_KEY
+        sync: false
       - key: COGNEE_BASE_URL
-        value: https://api.cognee.ai
+        value: https://tenant-678cbd16-0363-4f23-b418-21de6ff5e019.aws.cognee.ai
       - key: N8N_BASE_URL
         value: https://anshgoyalchd.app.n8n.cloud/
       - key: N8N_WEBHOOK_BASE_URL
         value: https://anshgoyalchd.app.n8n.cloud/webhook
+      - key: N8N_WEBHOOK_SECRET
+        value: paytm_n8n_secret_token_2026
+      - key: PAYMENT_VERIFICATION_PROVIDER
+        value: mock
+      - key: POLICY_MAX_CONTACT_ATTEMPTS
+        value: "2"
+      - key: POLICY_MIN_HOURS_BETWEEN_CONTACTS
+        value: "4"
+      - key: POLICY_CONTACT_START_HOUR
+        value: "9"
+      - key: POLICY_CONTACT_END_HOUR
+        value: "19"
+      - key: POLICY_DEFAULT_TIMEZONE
+        value: Asia/Kolkata
       - key: CORS_ORIGINS
         value: "*"
