@@ -17,9 +17,10 @@ class CogneeMemoryAdapter:
     """
 
     def __init__(self):
-        self.api_url = settings.COGNEE_API_URL
+        raw_url = settings.COGNEE_BASE_URL or settings.COGNEE_API_URL or "https://api.cognee.ai"
+        self.api_url = raw_url.rstrip("/")
         self.api_key = settings.COGNEE_API_KEY
-        self.client = httpx.AsyncClient(timeout=5.0)
+        self.client = httpx.AsyncClient(timeout=8.0)
 
     async def retrieve_customer_context(
         self,
@@ -29,28 +30,32 @@ class CogneeMemoryAdapter:
     ) -> Dict[str, Any]:
         """
         Retrieves durable memory context for a customer within a merchant tenant.
-        Returns structured facts and behavioral summary.
+        Returns structured facts and behavioral summary from Cognee Cloud or local store.
         """
-        # Scoped memory namespace
         dataset_name = f"tenant_{merchant_id}_cust_{customer_id}"
 
-        # Attempt to fetch from Cognee service if configured
+        # Attempt to fetch from Cognee Cloud if key is configured
         if self.api_key and not self.api_key.startswith("your_"):
             try:
+                headers = {"X-Api-Key": self.api_key, "Content-Type": "application/json"}
                 response = await self.client.post(
-                    f"{self.api_url}/search",
-                    headers={"Authorization": f"Bearer {self.api_key}"},
-                    json={"query": "payment history, commitments, preferences", "dataset": dataset_name},
+                    f"{self.api_url}/api/v1/search",
+                    headers=headers,
+                    json={
+                        "query": "payment history, customer preferences, past commitments",
+                        "searchType": "CHUNKS",
+                    },
                 )
                 if response.status_code == 200:
                     data = response.json()
+                    facts = [item.get("text", str(item)) for item in data] if isinstance(data, list) else []
                     return {
-                        "source": "COGNEE_SERVICE",
-                        "facts": data.get("results", []),
-                        "summary": "Retrieved from Cognee knowledge graph",
+                        "source": "COGNEE_CLOUD",
+                        "facts": facts or ["Customer records present in Cognee Cloud knowledge graph"],
+                        "summary": "Retrieved from live Cognee Cloud memory graph.",
                     }
             except Exception as e:
-                logger.warning(f"Cognee search failed ({e}), using local memory context.")
+                logger.warning(f"Cognee Cloud search failed ({e}), using local memory context.")
 
         # Local fallback context
         return {
@@ -80,15 +85,16 @@ class CogneeMemoryAdapter:
 
         if self.api_key and not self.api_key.startswith("your_"):
             try:
+                headers = {"X-Api-Key": self.api_key, "Content-Type": "application/json"}
                 res = await self.client.post(
-                    f"{self.api_url}/add",
-                    headers={"Authorization": f"Bearer {self.api_key}"},
-                    json={"dataset": dataset_name, "data": interaction_summary},
+                    f"{self.api_url}/api/v1/add_text",
+                    headers=headers,
+                    json={"textData": [interaction_summary], "datasetName": dataset_name},
                 )
                 if res.status_code in (200, 201):
-                    return {"status": "SUCCESS", "provider": "COGNEE", "id": res.json().get("id")}
+                    return {"status": "SUCCESS", "provider": "COGNEE_CLOUD", "id": res.json().get("pipeline_run_id")}
             except Exception as e:
-                logger.warning(f"Failed to record in Cognee service: {e}")
+                logger.warning(f"Failed to record in Cognee Cloud service: {e}")
 
         logger.info(f"[COGNEE LOCAL] Stored memory for {dataset_name}: {interaction_summary}")
         return {
