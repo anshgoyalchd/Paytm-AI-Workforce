@@ -16,7 +16,10 @@
       "name": "Daily Morning 09:15 IST Trigger",
       "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
-      "position": [250, 300]
+      "position": [
+        250,
+        300
+      ]
     },
     {
       "parameters": {
@@ -27,7 +30,10 @@
       "name": "Fetch Overdue Cases",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [450, 300]
+      "position": [
+        450,
+        300
+      ]
     },
     {
       "parameters": {
@@ -39,7 +45,10 @@
       "name": "Execute Agent Turn",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.1,
-      "position": [650, 300]
+      "position": [
+        650,
+        300
+      ]
     },
     {
       "parameters": {
@@ -56,12 +65,15 @@
       "name": "Is Escalated?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 1,
-      "position": [850, 300]
+      "position": [
+        850,
+        300
+      ]
     },
     {
       "parameters": {
-        "chatId": "={{ $json.chat_id || 'YOUR_TELEGRAM_CHAT_ID' }}",
-        "text": "=?? *High-Priority Escalation Alert*\n\nCase ID: `{{$json.case_id}}`\nCustomer: {{$json.customer_name || 'Customer'}}\nReason: *{{$json.decision_reason}}*\n\nAction Required: Human collections manager review needed on Paytm Collections Dashboard.",
+        "chatId": "6046501014",
+        "text": "=🚨 *High-Priority Escalation Alert*\n\nCase ID: `{{$json.case_id}}`\nCustomer: {{$json.customer_name || 'Customer'}}\nReason: *{{$json.decision_reason}}*\n\nAction Required: Human collections manager review needed on Paytm Collections Dashboard.",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
@@ -70,7 +82,10 @@
       "name": "Notify Escalation Team (Telegram)",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [1050, 200]
+      "position": [
+        1050,
+        200
+      ]
     }
   ],
   "connections": {
