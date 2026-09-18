@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: paytm-collections-backend
+    runtime: python
+    plan: free
+    region: singapore
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: SARVAM_SPEECH_MODEL
+        value: saaras:v1
+      - key: SARVAM_VOICE_ID
+        value: meera
+      - key: SARVAM_LANGUAGE_CODE
+        value: hi-IN
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_PHONE_NUMBER
+        value: "+17372508034"
+      - key: TWILIO_WHATSAPP_NUMBER
+        value: "whatsapp:+17372508034"
+      - key: COGNEE_BASE_URL
+        value: https://api.cognee.ai
+      - key: N8N_BASE_URL
+        value: https://anshgoyalchd.app.n8n.cloud/
+      - key: N8N_WEBHOOK_BASE_URL
+        value: https://anshgoyalchd.app.n8n.cloud/webhook
+      - key: CORS_ORIGINS
+        value: "*"

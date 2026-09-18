@@ -1,0 +1,121 @@
+{
+  "name": "Paytm Collections Agent Daily Orchestrator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "15 9 * * *"
+            }
+          ]
+        }
+      },
+      "id": "schedule-trigger",
+      "name": "Daily Morning 09:15 IST Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:8000/api/v1/cases?status=NEW",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "fetch-new-cases",
+      "name": "Fetch Overdue Cases",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://localhost:8000/api/v1/cases/{{$json.id}}/trigger-turn",
+        "options": {}
+      },
+      "id": "trigger-agent-loop",
+      "name": "Execute Agent Turn",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{$json.is_escalated}}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-escalation",
+      "name": "Is Escalated?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "content": "=🚨 High-Priority Escalation Alert: Case {{$json.case_id}} escalated. Reason: {{$json.decision_reason}}",
+        "options": {}
+      },
+      "id": "notify-escalation-team",
+      "name": "Notify Escalation Team",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [1050, 200]
+    }
+  ],
+  "connections": {
+    "Daily Morning 09:15 IST Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Overdue Cases",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Overdue Cases": {
+      "main": [
+        [
+          {
+            "node": "Execute Agent Turn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Agent Turn": {
+      "main": [
+        [
+          {
+            "node": "Is Escalated?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Escalated?": {
+      "main": [
+        [
+          {
+            "node": "Notify Escalation Team",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
