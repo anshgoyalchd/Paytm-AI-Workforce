@@ -3,7 +3,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from backend.app.core.config import settings
 from backend.app.core.database import engine, Base
-from database.seed.demo_data import seed_data
 
 from backend.app.api.v1.auth import router as auth_router
 from backend.app.api.v1.cases import router as cases_router
@@ -18,10 +17,9 @@ from backend.app.api.webhooks import router as webhooks_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Ensure tables exist and initial demo data is ready
+    # Ensure tables exist
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    await seed_data()
     yield
 
 

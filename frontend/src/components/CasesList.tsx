@@ -9,7 +9,10 @@ import {
   Clock, 
   CheckCircle2, 
   AlertTriangle,
-  ChevronRight
+  ChevronRight,
+  Plus,
+  FileText,
+  UploadCloud
 } from 'lucide-react';
 import { CollectionCase, CaseStatus } from '../types';
 
@@ -17,9 +20,10 @@ interface CasesListProps {
   cases: CollectionCase[];
   onSelectCase: (caseItem: CollectionCase) => void;
   isLoading: boolean;
+  onAddCaseClick?: () => void;
 }
 
-export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoading }) => {
+export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoading, onAddCaseClick }) => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
@@ -79,9 +83,33 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
     }
   };
 
+  // Dedicated empty state for new merchants
+  if (!isLoading && cases.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center rounded-2xl bg-slate-900/40 border border-slate-800/80 my-4">
+        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-sky-500/10 to-blue-600/10 border border-sky-500/20 flex items-center justify-center mb-4">
+          <FileText className="w-8 h-8 text-sky-400" />
+        </div>
+        <h3 className="text-lg font-bold text-white mb-2">No Overdue Invoices Found</h3>
+        <p className="text-sm text-slate-400 max-w-md mb-6 leading-relaxed">
+          Your collection portfolio is clean! Add overdue customer invoices or upload a CSV spreadsheet to let the autonomous AI workforce begin debt recovery.
+        </p>
+        {onAddCaseClick && (
+          <button
+            onClick={onAddCaseClick}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold text-sm shadow-lg shadow-sky-500/25 transition-all"
+          >
+            <Plus className="w-4 h-4" />
+            <span>+ Add Your First Overdue Invoice</span>
+          </button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {/* Search & Filters */}
+      {/* Action Bar & Search & Filters */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         {/* Filter Pills */}
         <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-xl bg-slate-900/60 border border-slate-800">
@@ -100,16 +128,28 @@ export const CasesList: React.FC<CasesListProps> = ({ cases, onSelectCase, isLoa
           ))}
         </div>
 
-        {/* Search Field */}
-        <div className="relative min-w-[280px]">
-          <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
-          <input
-            type="text"
-            placeholder="Search customer, phone, invoice..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-slate-900/60 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-paytm-cyan"
-          />
+        {/* Search & Add Action */}
+        <div className="flex items-center gap-2.5">
+          <div className="relative min-w-[240px]">
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-slate-500" />
+            <input
+              type="text"
+              placeholder="Search customer, phone, invoice..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-xs bg-slate-900/60 border border-slate-800 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-paytm-cyan"
+            />
+          </div>
+
+          {onAddCaseClick && (
+            <button
+              onClick={onAddCaseClick}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs shadow-md shadow-sky-500/20 transition-all shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>+ Add Invoice</span>
+            </button>
+          )}
         </div>
       </div>
 

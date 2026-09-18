@@ -32,12 +32,33 @@ async def client():
 
 @pytest_asyncio.fixture
 async def auth_headers(client: AsyncClient):
-    login_res = await client.post(
-        "/api/v1/auth/login",
-        json={"email": "operator@rajelectronics.com", "password": "Password123!"},
+    email = f"test_owner_{datetime.now(timezone.utc).timestamp()}@example.com"
+    reg_res = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "business_name": "Test Acceptance Merchant",
+            "owner_name": "Test Owner",
+            "email": email,
+            "password": "Password123!",
+        },
     )
-    token = login_res.json()["access_token"]
-    return {"Authorization": f"Bearer {token}"}
+    token = reg_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Dynamically create test cases for this merchant
+    for i in range(5):
+        await client.post(
+            "/api/v1/cases",
+            headers=headers,
+            json={
+                "customer_name": f"Customer {i+1}",
+                "customer_phone": f"+9198765432{i}0",
+                "invoice_number": f"INV-TEST-00{i+1}",
+                "amount": 5000.0 * (i + 1),
+            },
+        )
+
+    return headers
 
 
 # =============================================================================
@@ -228,7 +249,7 @@ async def test_scenario_19_dispute_freeze_policy():
 async def test_scenario_20_settlement_discount_cap_allowed():
     """Scenario 20: 10% settlement discount is autonomously authorized."""
     case = CollectionCase(id="c20", merchant_id="m", customer_id="u", invoice_id="i", status="CONTACTED", outstanding_amount=5000)
-    settings = AgentSetting(merchant_id="m", agent_status="ACTIVE")
+    settings = AgentSetting(merchant_id="m", agent_status="ACTIVE", contact_start_hour=0, contact_end_hour=24)
     res = policy_engine.evaluate(case=case, action_type=ActionType.TEXT, settings=settings, discount_pct=10.0)
     assert res.is_allowed is True
     assert res.requires_human_approval is False
@@ -238,7 +259,7 @@ async def test_scenario_20_settlement_discount_cap_allowed():
 async def test_scenario_21_settlement_discount_exceeded_requires_approval():
     """Scenario 21: 15% discount exceeds autonomous authority, requires approval."""
     case = CollectionCase(id="c21", merchant_id="m", customer_id="u", invoice_id="i", status="CONTACTED", outstanding_amount=5000)
-    settings = AgentSetting(merchant_id="m", agent_status="ACTIVE")
+    settings = AgentSetting(merchant_id="m", agent_status="ACTIVE", contact_start_hour=0, contact_end_hour=24)
     res = policy_engine.evaluate(case=case, action_type=ActionType.TEXT, settings=settings, discount_pct=15.0)
     assert res.requires_human_approval is True
     assert "exceeds autonomous policy cap" in res.reason

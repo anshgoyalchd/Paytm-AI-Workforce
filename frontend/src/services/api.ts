@@ -9,6 +9,11 @@ import {
   SimulatorScenario,
   SimulationResult,
   AgentMode,
+  AuthUser,
+  LoginPayload,
+  RegisterPayload,
+  CreateCasePayload,
+  BulkUploadResponse,
 } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '') : '';
@@ -29,37 +34,56 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto login helper for demo experience
-export async function ensureAuthenticated(): Promise<string> {
-  const existingToken = localStorage.getItem('paytm_token');
-  if (existingToken) return existingToken;
-
-  try {
-    const res = await axios.post(`${API_BASE}/auth/login`, {
-      email: 'operator@rajelectronics.com',
-      password: 'Password123!',
-    });
-    const token = res.data.access_token;
-    localStorage.setItem('paytm_token', token);
-    localStorage.setItem('paytm_user', JSON.stringify(res.data));
-    return token;
-  } catch (error) {
-    console.error('Failed to auto-authenticate demo operator:', error);
-    throw error;
+// Intercept 401 unauthorized to clear expired session
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('paytm_token');
+      localStorage.removeItem('paytm_user');
+      window.dispatchEvent(new Event('auth:unauthorized'));
+    }
+    return Promise.reject(error);
   }
-}
+);
 
 export const api = {
+  // Authentication & Onboarding
+  async login(payload: LoginPayload): Promise<AuthUser> {
+    const res = await axios.post(`${API_BASE}/auth/login`, payload);
+    const data = res.data;
+    localStorage.setItem('paytm_token', data.access_token);
+    localStorage.setItem('paytm_user', JSON.stringify(data));
+    return data;
+  },
+
+  async register(payload: RegisterPayload): Promise<AuthUser> {
+    const res = await axios.post(`${API_BASE}/auth/register`, payload);
+    const data = res.data;
+    localStorage.setItem('paytm_token', data.access_token);
+    localStorage.setItem('paytm_user', JSON.stringify(data));
+    return data;
+  },
+
+  async getMe(): Promise<AuthUser> {
+    const res = await apiClient.get<AuthUser>(`${API_BASE}/auth/me`);
+    return res.data;
+  },
+
+  logout(): void {
+    localStorage.removeItem('paytm_token');
+    localStorage.removeItem('paytm_user');
+    window.location.reload();
+  },
+
   // Overview & Analytics
   async getOverview(): Promise<WorkforceOverview> {
-    await ensureAuthenticated();
     const res = await apiClient.get<WorkforceOverview>(`${API_BASE}/analytics/overview`);
     return res.data;
   },
 
   // Cases
   async getCases(status?: string, search?: string): Promise<CollectionCase[]> {
-    await ensureAuthenticated();
     const params: Record<string, string> = {};
     if (status && status !== 'ALL') params.status = status;
     if (search) params.search = search;
@@ -68,13 +92,27 @@ export const api = {
   },
 
   async getCaseDetail(caseId: string): Promise<CaseDetail> {
-    await ensureAuthenticated();
     const res = await apiClient.get<CaseDetail>(`${API_BASE}/cases/${caseId}`);
     return res.data;
   },
 
+  async createCase(payload: CreateCasePayload): Promise<CollectionCase> {
+    const res = await apiClient.post<CollectionCase>(`${API_BASE}/cases`, payload);
+    return res.data;
+  },
+
+  async uploadCasesCSV(file: File): Promise<BulkUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const res = await apiClient.post<BulkUploadResponse>(`${API_BASE}/cases/upload-csv`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  },
+
   async triggerCaseTurn(caseId: string, message?: string): Promise<any> {
-    await ensureAuthenticated();
     const params: Record<string, string> = {};
     if (message) params.customer_message = message;
     const res = await apiClient.post(`${API_BASE}/cases/${caseId}/trigger-turn`, null, { params });
@@ -83,7 +121,6 @@ export const api = {
 
   // Escalations
   async getEscalations(status?: string): Promise<Escalation[]> {
-    await ensureAuthenticated();
     const params: Record<string, string> = {};
     if (status && status !== 'ALL') params.status = status;
     const res = await apiClient.get<Escalation[]>(`${API_BASE}/escalations`, { params });
@@ -91,7 +128,6 @@ export const api = {
   },
 
   async resolveEscalation(escalationId: string, resolution: string): Promise<any> {
-    await ensureAuthenticated();
     const res = await apiClient.post(`${API_BASE}/escalations/${escalationId}/resolve`, {
       resolution,
       status: 'RESOLVED',
@@ -101,7 +137,6 @@ export const api = {
 
   // Decisions
   async getDecisions(caseId?: string): Promise<Decision[]> {
-    await ensureAuthenticated();
     const params: Record<string, string> = {};
     if (caseId) params.case_id = caseId;
     const res = await apiClient.get<Decision[]>(`${API_BASE}/decisions`, { params });
@@ -109,13 +144,11 @@ export const api = {
   },
 
   async approveDecision(decisionId: string): Promise<any> {
-    await ensureAuthenticated();
     const res = await apiClient.post(`${API_BASE}/decisions/${decisionId}/approve`);
     return res.data;
   },
 
   async rejectDecision(decisionId: string, reason?: string): Promise<any> {
-    await ensureAuthenticated();
     const res = await apiClient.post(`${API_BASE}/decisions/${decisionId}/reject`, null, {
       params: { reason },
     });
@@ -124,19 +157,16 @@ export const api = {
 
   // Agent Settings & Governance
   async getSettings(): Promise<AgentSettings> {
-    await ensureAuthenticated();
     const res = await apiClient.get<AgentSettings>(`${API_BASE}/settings`);
     return res.data;
   },
 
   async toggleAgentMode(mode: AgentMode): Promise<any> {
-    await ensureAuthenticated();
     const res = await apiClient.post(`${API_BASE}/settings/toggle-mode?mode=${mode}`);
     return res.data;
   },
 
   async updateSettings(payload: Partial<AgentSettings>): Promise<AgentSettings> {
-    await ensureAuthenticated();
     const res = await apiClient.put<AgentSettings>(`${API_BASE}/settings`, payload);
     return res.data;
   },
@@ -148,7 +178,6 @@ export const api = {
   },
 
   async runScenario(caseId: string, scenarioName: string, customerMessage?: string): Promise<SimulationResult> {
-    await ensureAuthenticated();
     const res = await apiClient.post<SimulationResult>(`${API_BASE}/simulator/run`, {
       case_id: caseId,
       scenario_name: scenarioName,

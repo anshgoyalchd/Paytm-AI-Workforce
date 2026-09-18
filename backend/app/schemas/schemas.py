@@ -67,11 +67,21 @@ class Token(BaseModel):
     user_id: str
     role: str
     name: str
+    business_name: Optional[str] = None
 
 
 class LoginRequest(BaseModel):
     email: str
     password: str
+
+
+class RegisterRequest(BaseModel):
+    business_name: str
+    owner_name: str
+    email: str
+    password: str
+    phone: Optional[str] = None
+    timezone: str = "Asia/Kolkata"
 
 
 # --- Merchant & User ---
@@ -152,6 +162,25 @@ class CaseDetail(CaseRead):
     commitments: List["PaymentCommitmentRead"] = []
     verifications: List["PaymentVerificationRead"] = []
     escalations: List["EscalationRead"] = []
+
+
+class CaseCreateRequest(BaseModel):
+    customer_name: str
+    customer_phone: str
+    customer_email: Optional[str] = None
+    preferred_language: str = "Hindi"
+    preferred_channel: str = "WHATSAPP"
+    invoice_number: str
+    amount: float
+    due_date: Optional[str] = None  # YYYY-MM-DD format
+    priority: str = "MEDIUM"
+
+
+class BulkCaseUploadResponse(BaseModel):
+    imported_count: int
+    skipped_count: int = 0
+    errors: List[str] = []
+    cases: List[CaseRead] = []
 
 
 # --- Conversation & Message ---

@@ -192,3 +192,45 @@ export interface SimulationResult {
   verification_status?: string;
   escalated: boolean;
 }
+
+export interface AuthUser {
+  user_id: string;
+  name: string;
+  email: string;
+  role: string;
+  merchant_id: string;
+  business_name?: string;
+  access_token?: string;
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface RegisterPayload {
+  business_name: string;
+  owner_name: string;
+  email: string;
+  password: string;
+  phone?: string;
+}
+
+export interface CreateCasePayload {
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  preferred_language?: string;
+  preferred_channel?: string;
+  invoice_number: string;
+  amount: number;
+  due_date?: string;
+  priority?: string;
+}
+
+export interface BulkUploadResponse {
+  imported_count: number;
+  skipped_count: number;
+  errors: string[];
+  cases: CollectionCase[];
+}

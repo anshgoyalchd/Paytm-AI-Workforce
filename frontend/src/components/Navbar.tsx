@@ -7,9 +7,11 @@ import {
   PlayCircle, 
   Eye, 
   Store, 
-  UserCheck 
+  UserCheck,
+  Plus,
+  LogOut
 } from 'lucide-react';
-import { AgentMode } from '../types';
+import { AgentMode, AuthUser } from '../types';
 
 interface NavbarProps {
   currentTab: string;
@@ -17,6 +19,9 @@ interface NavbarProps {
   agentMode: AgentMode;
   onModeChange: (mode: AgentMode) => void;
   pendingEscalationsCount: number;
+  user?: AuthUser | null;
+  onAddCaseClick?: () => void;
+  onLogout?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -25,6 +30,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   agentMode,
   onModeChange,
   pendingEscalationsCount,
+  user,
+  onAddCaseClick,
+  onLogout,
 }) => {
   const getStatusBadge = () => {
     switch (agentMode) {
@@ -52,6 +60,13 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
+  const getInitials = (name?: string) => {
+    if (!name) return 'ME';
+    const parts = name.trim().split(' ');
+    if (parts.length >= 2) return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800 bg-slate-950/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -71,7 +86,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-400">
                   <Store className="w-3 h-3 text-slate-500" />
-                  <span>Raj Electronics & Retail</span>
+                  <span className="font-medium text-slate-300">{user?.business_name || 'My Merchant Workspace'}</span>
                   <span className="text-slate-600">•</span>
                   <span>Asia/Kolkata (IST)</span>
                 </div>
@@ -82,13 +97,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* Mode Controls & Operator */}
-          <div className="flex items-center gap-4">
+          {/* Mode Controls, Add Invoice & User */}
+          <div className="flex items-center gap-3">
+            {/* Add Invoice Quick Action */}
+            {onAddCaseClick && (
+              <button
+                onClick={onAddCaseClick}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs shadow-md shadow-sky-500/20 transition-all"
+                title="Add a new customer overdue invoice"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Add Invoice</span>
+              </button>
+            )}
+
             {/* Global Killswitch / Mode Switcher */}
-            <div className="flex items-center p-0.5 rounded-lg bg-slate-900 border border-slate-800">
+            <div className="hidden sm:flex items-center p-0.5 rounded-lg bg-slate-900 border border-slate-800">
               <button
                 onClick={() => onModeChange('AUTONOMOUS')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                   agentMode === 'AUTONOMOUS'
                     ? 'bg-emerald-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -100,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
               <button
                 onClick={() => onModeChange('SUPERVISED')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                   agentMode === 'SUPERVISED'
                     ? 'bg-amber-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
@@ -112,7 +139,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
               <button
                 onClick={() => onModeChange('PAUSED')}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all ${
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium transition-all ${
                   agentMode === 'PAUSED'
                     ? 'bg-rose-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-rose-400'
@@ -124,15 +151,24 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
 
-            {/* Operator Pill */}
-            <div className="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-800 text-xs">
-              <div className="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 font-semibold">
-                RS
+            {/* Merchant User Pill */}
+            <div className="flex items-center gap-2 pl-3 border-l border-slate-800 text-xs">
+              <div className="w-7 h-7 rounded-full bg-sky-950 border border-sky-600/40 flex items-center justify-center text-sky-300 font-semibold text-[11px]">
+                {getInitials(user?.name)}
               </div>
-              <div className="text-left">
-                <div className="font-medium text-slate-200">Rajesh Sharma</div>
-                <div className="text-[10px] text-slate-400">OPERATOR</div>
+              <div className="hidden md:block text-left">
+                <div className="font-medium text-slate-200 truncate max-w-[120px]">{user?.name || 'Merchant'}</div>
+                <div className="text-[10px] text-slate-400 uppercase">{user?.role || 'OWNER'}</div>
               </div>
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-900 transition-colors ml-1"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
           </div>
         </div>
