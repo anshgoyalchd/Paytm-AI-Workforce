@@ -23,7 +23,16 @@
     },
     {
       "parameters": {
-        "url": "https://paytm-collections-backend.onrender.com/api/v1/cases?status=NEW",
+        "url": "https://paytm-collections-backend.onrender.com/api/v1/cases",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyX29wZXJhdG9yXzEiLCJtZXJjaGFudF9pZCI6Im1lcmNoX3Jhal9lbGVjdHJvbmljcyIsImVtYWlsIjoib3BlcmF0b3JAcmFqZWxlY3Ryb25pY3MuY29tIiwicm9sZSI6Ik9QRVJBVE9SIiwibmFtZSI6IlJhamVzaCBLdW1hciIsImV4cCI6MjEwNTEwMDU5NX0.F81yZJIUeZeIdj-W9YMDYmRjv_lonABrJXs9v57OLL0"
+            }
+          ]
+        },
         "options": {}
       },
       "id": "fetch-new-cases",
@@ -39,6 +48,15 @@
       "parameters": {
         "method": "POST",
         "url": "=https://paytm-collections-backend.onrender.com/api/v1/cases/{{$json.id}}/trigger-turn",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyX29wZXJhdG9yXzEiLCJtZXJjaGFudF9pZCI6Im1lcmNoX3Jhal9lbGVjdHJvbmljcyIsImVtYWlsIjoib3BlcmF0b3JAcmFqZWxlY3Ryb25pY3MuY29tIiwicm9sZSI6Ik9QRVJBVE9SIiwibmFtZSI6IlJhamVzaCBLdW1hciIsImV4cCI6MjEwNTEwMDU5NX0.F81yZJIUeZeIdj-W9YMDYmRjv_lonABrJXs9v57OLL0"
+            }
+          ]
+        },
         "options": {}
       },
       "id": "trigger-agent-loop",
@@ -55,7 +73,7 @@
         "conditions": {
           "boolean": [
             {
-              "value1": "={{$json.is_escalated}}",
+              "value1": "={{$json.is_escalated || ($json.status === 'ESCALATED')}}",
               "value2": true
             }
           ]
@@ -73,7 +91,7 @@
     {
       "parameters": {
         "chatId": "6046501014",
-        "text": "=🚨 *High-Priority Escalation Alert*\n\nCase ID: `{{$json.case_id}}`\nCustomer: {{$json.customer_name || 'Customer'}}\nReason: *{{$json.decision_reason}}*\n\nAction Required: Human collections manager review needed on Paytm Collections Dashboard.",
+        "text": "=?? *High-Priority Escalation Alert*\n\nCase ID: `{{$json.case_id || $json.id}}`\nStatus: *{{$json.status || 'ESCALATED'}}*\nAmount Due: ?{{$json.outstanding_amount || 0}}\nReason: *{{$json.decision_reason || 'High-debt or customer dispute flagged for human review'}}*\n\nAction Required: Human collections manager review needed on Paytm Collections Dashboard.",
         "additionalFields": {
           "parse_mode": "Markdown"
         }
