@@ -35,7 +35,7 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
   const [turnResult, setTurnResult] = useState<any | null>(null);
   const [isAutoReaching, setIsAutoReaching] = useState<boolean>(false);
   const [autoReachResult, setAutoReachResult] = useState<any | null>(null);
-  const [selectedOutreachChannel, setSelectedOutreachChannel] = useState<'AUTO' | 'VOICE' | 'WHATSAPP'>('AUTO');
+  const [selectedOutreachChannel, setSelectedOutreachChannel] = useState<'AUTO' | 'VOICE' | 'WHATSAPP'>('VOICE');
 
   useEffect(() => {
     if (caseId) {
@@ -251,11 +251,10 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
                     <select
                       value={selectedOutreachChannel}
                       onChange={(e) => setSelectedOutreachChannel(e.target.value as any)}
-                      className="px-2 py-1 text-xs rounded-md bg-white border border-slate-300 text-slate-800 shadow-xs focus:outline-none"
+                      className="px-2 py-1 text-xs rounded-md bg-white border border-slate-300 text-slate-800 shadow-xs focus:outline-none font-medium"
                     >
-                      <option value="AUTO">Auto (AI Decides)</option>
-                      <option value="VOICE">Voice Call (Twilio)</option>
-                      <option value="WHATSAPP">WhatsApp / SMS</option>
+                      <option value="VOICE">Voice Call (Native Hindi)</option>
+                      <option value="WHATSAPP">WhatsApp (Trial Sandbox)</option>
                     </select>
 
                     <button

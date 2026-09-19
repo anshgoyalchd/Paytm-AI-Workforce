@@ -407,9 +407,8 @@ class CollectionsAgent:
         )
 
         # 6. Determine Channel (Voice Call vs WhatsApp)
-        channel = preferred_channel or customer.preferred_channel or "WHATSAPP"
-        if not preferred_channel and settings.auto_voice_enabled and (days_overdue > 14 or case.priority == "HIGH"):
-            channel = "VOICE"
+        # Default to VOICE: 100% operational, speaks native Hindi via Polly.Aditi, and has no DLT/template restrictions
+        channel = preferred_channel or customer.preferred_channel or "VOICE"
 
         lang = customer.preferred_language or "Hindi"
         pay_link = f"https://paytm.com/pay/{invoice.invoice_number}"
