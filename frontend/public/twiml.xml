@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="Polly.Aditi" language="hi-IN">नमस्ते, यह पेटीएम कलेक्शंस से आवश्यक स्मरण पत्र है। आपका इनवॉइस भुगतान लंबित है, कृपया शीघ्र भुगतान करें। धन्यवाद।</Say>
+</Response>
