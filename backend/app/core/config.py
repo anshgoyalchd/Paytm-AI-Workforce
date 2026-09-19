@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     TWILIO_AUTH_TOKEN: str = ""
     TWILIO_PHONE_NUMBER: str = ""
     TWILIO_WHATSAPP_NUMBER: str = ""
+    TWILIO_WHATSAPP_CONTENT_SID: str = ""
 
     # Indic Speech (Sarvam AI / Mock fallback)
     SARVAM_API_KEY: str = ""

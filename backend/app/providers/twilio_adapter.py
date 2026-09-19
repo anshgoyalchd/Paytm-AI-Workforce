@@ -58,14 +58,22 @@ class TwilioAdapter:
         if self.is_configured and self.from_whatsapp:
             try:
                 url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Messages.json"
+                payload = {
+                    "From": self.from_whatsapp,
+                    "To": to_formatted,
+                }
+                content_sid = getattr(settings, "TWILIO_WHATSAPP_CONTENT_SID", "") or ""
+                if content_sid.strip().startswith("HX"):
+                    import json
+                    payload["ContentSid"] = content_sid.strip()
+                    payload["ContentVariables"] = json.dumps({"1": message[:60], "2": "Paytm UPI"})
+                else:
+                    payload["Body"] = message
+
                 response = await self.client.post(
                     url,
                     auth=(self.account_sid, self.auth_token),
-                    data={
-                        "From": self.from_whatsapp,
-                        "To": to_formatted,
-                        "Body": message,
-                    },
+                    data=payload,
                 )
                 if response.status_code in (200, 201):
                     data = response.json()
