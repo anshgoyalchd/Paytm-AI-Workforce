@@ -12,7 +12,8 @@ import {
   RefreshCw,
   PhoneCall,
   MessageSquare,
-  Zap
+  Zap,
+  Mail
 } from 'lucide-react';
 import { CaseDetail, Message, Decision } from '../types';
 import { api } from '../services/api';
@@ -35,7 +36,7 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
   const [turnResult, setTurnResult] = useState<any | null>(null);
   const [isAutoReaching, setIsAutoReaching] = useState<boolean>(false);
   const [autoReachResult, setAutoReachResult] = useState<any | null>(null);
-  const [selectedOutreachChannel, setSelectedOutreachChannel] = useState<'AUTO' | 'VOICE' | 'WHATSAPP'>('VOICE');
+  const [selectedOutreachChannel, setSelectedOutreachChannel] = useState<'AUTO' | 'VOICE' | 'WHATSAPP' | 'EMAIL'>('EMAIL');
 
   useEffect(() => {
     if (caseId) {
@@ -125,8 +126,21 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
                   {detail?.status}
                 </span>
               </div>
-              <div className="text-xs text-slate-500">
-                {detail?.customer?.phone} • Language: {detail?.customer?.preferred_language} • Due: {formatCurrency(detail?.outstanding_amount || 0)}
+              <div className="text-xs text-slate-500 flex items-center gap-1.5 flex-wrap">
+                <span>{detail?.customer?.phone}</span>
+                {detail?.customer?.email && (
+                  <>
+                    <span>•</span>
+                    <span className="text-blue-600 font-medium flex items-center gap-1">
+                      <Mail className="w-3 h-3" />
+                      {detail.customer.email}
+                    </span>
+                  </>
+                )}
+                <span>•</span>
+                <span>Language: {detail?.customer?.preferred_language}</span>
+                <span>•</span>
+                <span className="font-semibold text-slate-700">Due: {formatCurrency(detail?.outstanding_amount || 0)}</span>
               </div>
             </div>
           </div>
@@ -253,6 +267,7 @@ export const CaseDetailModal: React.FC<CaseDetailModalProps> = ({
                       onChange={(e) => setSelectedOutreachChannel(e.target.value as any)}
                       className="px-2 py-1 text-xs rounded-md bg-white border border-slate-300 text-slate-800 shadow-xs focus:outline-none font-medium"
                     >
+                      <option value="EMAIL">Email (Instant & Verified)</option>
                       <option value="VOICE">Voice Call (Native Hindi)</option>
                       <option value="WHATSAPP">WhatsApp (Trial Sandbox)</option>
                     </select>

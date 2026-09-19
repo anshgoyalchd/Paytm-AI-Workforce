@@ -34,6 +34,7 @@ from backend.app.providers.payment_mock import payment_gateway
 from backend.app.providers.cognee_adapter import cognee_adapter
 from backend.app.providers.twilio_adapter import twilio_adapter
 from backend.app.providers.sarvam_adapter import sarvam_adapter
+from backend.app.providers.email_adapter import email_adapter
 
 logger = logging.getLogger(__name__)
 
@@ -223,10 +224,22 @@ class CollectionsAgent:
                     )
                     # Dispatch message
                     msg_content = decision_raw.get("message_content", "")
-                    send_res = await twilio_adapter.send_whatsapp_message(
-                        to_phone=customer.phone,
-                        message=msg_content,
-                    )
+                    if incoming_channel == Channel.EMAIL:
+                        target_email = customer.email or "ansh.goyalchd@gmail.com"
+                        send_res = await email_adapter.send_collection_email(
+                            to_email=target_email,
+                            customer_name=customer.name,
+                            invoice_number=invoice.invoice_number,
+                            amount=float(case.outstanding_amount),
+                            due_date_str=invoice.due_date.strftime('%d %b %Y') if invoice.due_date else "Immediate",
+                            pay_link=f"https://paytm.com/pay/{invoice.invoice_number}",
+                            language=customer.preferred_language or "Hindi",
+                        )
+                    else:
+                        send_res = await twilio_adapter.send_whatsapp_message(
+                            to_phone=customer.phone,
+                            message=msg_content,
+                        )
                     action_record.status = "COMPLETED"
                     action_record.executed_at = datetime.now(timezone.utc)
                     action_record.completed_at = datetime.now(timezone.utc)
@@ -459,9 +472,21 @@ class CollectionsAgent:
         settings._is_manual_trigger = True
         action_type = ActionType.CALL if channel == "VOICE" else ActionType.TEXT
 
-        # 9. Execute Outbound Outreach via Twilio
+        # 9. Execute Outbound Outreach via Twilio / Resend Email
         delivery_result = {}
-        if action_type == ActionType.CALL:
+        if channel == "EMAIL":
+            target_email = customer.email or "ansh.goyalchd@gmail.com"
+            delivery_result = await email_adapter.send_collection_email(
+                to_email=target_email,
+                customer_name=customer.name,
+                invoice_number=invoice.invoice_number,
+                amount=outstanding,
+                due_date_str=due_date.strftime('%d %b %Y') if due_date else "Immediate",
+                pay_link=pay_link,
+                language=lang,
+                business_name=business_name,
+            )
+        elif action_type == ActionType.CALL:
             delivery_result = await twilio_adapter.initiate_voice_call(
                 to_phone=customer.phone,
                 say_text=outreach_text,

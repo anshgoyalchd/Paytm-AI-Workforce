@@ -44,6 +44,10 @@ class Settings(BaseSettings):
     COGNEE_API_URL: str = "https://api.cognee.ai"
     COGNEE_BASE_URL: str = "https://api.cognee.ai"
 
+    # Email Provider (Resend)
+    RESEND_API_KEY: str = ""
+    RESEND_FROM_EMAIL: str = "Paytm Collections <onboarding@resend.dev>"
+
     # Orchestration (n8n Cloud / Self-hosted)
     N8N_WEBHOOK_BASE_URL: str = "http://localhost:5678/webhook"
     N8N_BASE_URL: str = "http://localhost:5678"

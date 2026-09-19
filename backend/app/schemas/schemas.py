@@ -29,6 +29,7 @@ class Channel(str, Enum):
     WHATSAPP = "WHATSAPP"
     VOICE = "VOICE"
     SMS = "SMS"
+    EMAIL = "EMAIL"
 
 
 class CustomerIntent(str, Enum):
