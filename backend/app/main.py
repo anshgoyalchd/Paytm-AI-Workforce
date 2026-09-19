@@ -11,6 +11,7 @@ from backend.app.api.v1.escalations import router as escalations_router
 from backend.app.api.v1.analytics import router as analytics_router
 from backend.app.api.v1.settings import router as settings_router
 from backend.app.api.v1.simulator import router as simulator_router
+from backend.app.api.v1.voice import router as voice_router
 from backend.app.api.v1.mock_payment import router as mock_payment_router
 from backend.app.api.webhooks import router as webhooks_router
 
@@ -48,6 +49,7 @@ app.include_router(escalations_router, prefix=api_v1_prefix)
 app.include_router(analytics_router, prefix=api_v1_prefix)
 app.include_router(settings_router, prefix=api_v1_prefix)
 app.include_router(simulator_router, prefix=api_v1_prefix)
+app.include_router(voice_router, prefix=api_v1_prefix)
 
 # Mount Mock & Webhook Routers
 app.include_router(mock_payment_router, prefix="/api")

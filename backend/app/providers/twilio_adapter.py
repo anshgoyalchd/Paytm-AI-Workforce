@@ -104,18 +104,29 @@ class TwilioAdapter:
         target_phone = _format_e164(to_phone)
         if self.is_configured and self.from_phone:
             try:
+                # 1. Synthesize native Indic Hindi audio using Sarvam AI
+                if not twiml_url and say_text:
+                    try:
+                        from backend.app.providers.sarvam_adapter import sarvam_adapter
+                        speech_res = await sarvam_adapter.synthesize_speech(say_text, language_code="hi-IN")
+                        if speech_res.get("twiml_url"):
+                            twiml_url = speech_res["twiml_url"]
+                    except Exception as e:
+                        logger.warning(f"Sarvam synthesis error: {e}")
+
+                if not twiml_url:
+                    if say_text:
+                        encoded_msg = urllib.parse.quote(say_text)
+                        twiml_url = f"https://paytm-collections-backend.onrender.com/api/v1/voice/twiml?text={encoded_msg}"
+                    else:
+                        twiml_url = "https://paytm-collections-backend.onrender.com/api/v1/voice/twiml"
+
                 url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Calls.json"
                 data = {
                     "From": self.from_phone,
                     "To": target_phone,
+                    "Url": twiml_url,
                 }
-                if twiml_url:
-                    data["Url"] = twiml_url
-                elif say_text:
-                    encoded_msg = urllib.parse.quote(say_text)
-                    data["Url"] = f"https://twimlets.com/message?Message%5B0%5D={encoded_msg}"
-                else:
-                    data["Url"] = "http://demo.twilio.com/docs/voice.xml"
 
                 response = await self.client.post(
                     url,
