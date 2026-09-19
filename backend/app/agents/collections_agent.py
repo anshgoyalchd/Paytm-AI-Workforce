@@ -427,44 +427,74 @@ class CollectionsAgent:
         pay_link = f"https://paytm.com/pay/{invoice.invoice_number}"
 
         # 7. Formulate Contextual Message based on Full Analysis
+        amt_clean = f"{int(outstanding):,}"
+
         if broken_commitment:
             c_date_str = broken_commitment.commitment_date.strftime("%d %b")
             if lang == "Hindi":
                 outreach_text = (
-                    f"नमस्ते {customer.name} जी, यह {business_name} से इनवॉइस {invoice.invoice_number} (बकाया ₹{outstanding:,.2f}) के संदर्भ में है। "
-                    f"आपके द्वारा {c_date_str} तक भुगतान करने का वादा किया गया था जो अभी तक अप्राप्त है। "
-                    f"कृपया अपने अच्छे रिकॉर्ड को बनाए रखने हेतु तुरंत भुगतान करें: {pay_link}"
+                    f"नमस्ते {customer.name} जी, {business_name} की तरफ से इनवॉइस {invoice.invoice_number} (बकाया ₹{amt_clean}) का रिमाइंडर। "
+                    f"आपने {c_date_str} तक पेमेंट करने का वादा किया था। कृपया तुरंत इस सुरक्षित लिंक से पेमेंट करें: {pay_link}"
+                )
+                voice_text = (
+                    f"नमस्ते {customer.name} जी! मैं {business_name} के लिए Paytm AI असिस्टेंट से बात कर रही हूँ। "
+                    f"आपने {c_date_str} तक पेमेंट करने का वादा किया था, लेकिन आपका इनवॉइस नंबर {invoice.invoice_number} का {amt_clean} रुपये का पेमेंट अभी तक रिसीव नहीं हुआ है। "
+                    f"पेमेंट करने का सिक्योर लिंक आपके मोबाइल और ईमेल पर भेज दिया गया है। "
+                    f"कृपया आज ही अपना पेमेंट कम्पलीट कर लें, ताकि आपका खाता सही रहे। शुक्रिया!"
                 )
             else:
                 outreach_text = (
-                    f"Hello {customer.name}, this is from {business_name} regarding overdue invoice {invoice.invoice_number} (₹{outstanding:,.2f}). "
-                    f"We noticed the promised payment date ({c_date_str}) has passed. "
-                    f"Please settle your balance immediately at: {pay_link}"
+                    f"Hello {customer.name}, follow-up from {business_name} regarding overdue invoice {invoice.invoice_number} (₹{amt_clean}). "
+                    f"Promised payment date ({c_date_str}) has passed. Settle at: {pay_link}"
+                )
+                voice_text = (
+                    f"Hello {customer.name}! This is the Paytm AI Assistant calling on behalf of {business_name}. "
+                    f"Your promised payment of {amt_clean} rupees for invoice {invoice.invoice_number} by {c_date_str} is still pending. "
+                    f"A secure payment link has been sent to your mobile and email. Please clear your balance today. Thank you!"
                 )
         elif past_messages_count > 0:
             if lang == "Hindi":
                 outreach_text = (
-                    f"नमस्ते {customer.name} जी, {business_name} की ओर से इनवॉइस {invoice.invoice_number} (राशि ₹{outstanding:,.2f}) का आवश्यक स्मरण पत्र। "
-                    f"यह बिल {days_overdue} दिनों से बकाया है। असुविधा और लेट फीस से बचने के लिए अभी भुगतान करें: {pay_link}"
+                    f"नमस्ते {customer.name} जी, {business_name} की ओर से इनवॉइस {invoice.invoice_number} (राशि ₹{amt_clean}) का आवश्यक स्मरण पत्र। "
+                    f"यह बिल {days_overdue} दिनों से बकाया है। अभी भुगतान करें: {pay_link}"
+                )
+                voice_text = (
+                    f"नमस्ते {customer.name} जी! {business_name} की तरफ से यह एक ज़रूरी रिमाइंडर है। "
+                    f"आपका इनवॉइस नंबर {invoice.invoice_number} का {amt_clean} रुपये का पेमेंट पिछले {days_overdue} दिनों से पेंडिंग है। "
+                    f"किसी भी लेट फीस या असुविधा से बचने के लिए, कृपया अपने फोन पर भेजे गए लिंक से आज ही पेमेंट क्लियर कर दीजिए। थैंक यू!"
                 )
             else:
                 outreach_text = (
-                    f"Hello {customer.name}, urgent follow-up from {business_name} regarding invoice {invoice.invoice_number} (₹{outstanding:,.2f}), "
-                    f"now {days_overdue} days overdue. Please clear the pending dues securely at: {pay_link}"
+                    f"Hello {customer.name}, urgent follow-up from {business_name} regarding invoice {invoice.invoice_number} (₹{amt_clean}), "
+                    f"now {days_overdue} days overdue. Please clear dues at: {pay_link}"
+                )
+                voice_text = (
+                    f"Hello {customer.name}! This is an urgent reminder from {business_name}. "
+                    f"Your invoice {invoice.invoice_number} for {amt_clean} rupees is now {days_overdue} days overdue. "
+                    f"We have sent the payment link to your registered phone and email. Please clear your balance today to avoid late fees. Thank you!"
                 )
         else:
             # First Outreach
             if lang == "Hindi":
                 outreach_text = (
-                    f"नमस्ते {customer.name} जी, {business_name} से इनवॉइस {invoice.invoice_number} की बकाया राशि ₹{outstanding:,.2f} है "
-                    f"(नियत तिथि: {due_date.strftime('%d %b %Y') if due_date else 'तत्काल'})। "
+                    f"नमस्ते {customer.name} जी, {business_name} से इनवॉइस {invoice.invoice_number} की बकाया राशि ₹{amt_clean} है। "
                     f"कृपया Paytm UPI द्वारा इस सुरक्षित लिंक से भुगतान करें: {pay_link}"
+                )
+                voice_text = (
+                    f"नमस्ते {customer.name} जी! मैं {business_name} के लिए Paytm AI असिस्टेंट से बात कर रही हूँ। "
+                    f"आपका इनवॉइस नंबर {invoice.invoice_number} का {amt_clean} रुपये का पेमेंट अभी पेंडिंग है। "
+                    f"पेमेंट करने का सुरक्षित लिंक आपके मोबाइल नंबर और ईमेल पर भेज दिया गया है। "
+                    f"कृपया आज ही अपना पेमेंट कम्पलीट कर लें। किसी भी सहायता के लिए आप हमसे संपर्क कर सकते हैं। धन्यवाद!"
                 )
             else:
                 outreach_text = (
-                    f"Hello {customer.name}, reminder from {business_name} regarding invoice {invoice.invoice_number} for ₹{outstanding:,.2f} "
-                    f"(Due: {due_date.strftime('%d %b %Y') if due_date else 'overdue'}). "
+                    f"Hello {customer.name}, reminder from {business_name} regarding invoice {invoice.invoice_number} for ₹{amt_clean}. "
                     f"Please settle securely via Paytm UPI: {pay_link}"
+                )
+                voice_text = (
+                    f"Hello {customer.name}! This is the Paytm AI Assistant calling on behalf of {business_name}. "
+                    f"You have a pending balance of {amt_clean} rupees for invoice number {invoice.invoice_number}. "
+                    f"A secure Paytm payment link has been sent to your mobile and email. Please complete the payment today. Thank you!"
                 )
 
         # 8. Policy Check Tag (Manual trigger bypasses curfew)
@@ -489,7 +519,7 @@ class CollectionsAgent:
         elif action_type == ActionType.CALL:
             delivery_result = await twilio_adapter.initiate_voice_call(
                 to_phone=customer.phone,
-                say_text=outreach_text,
+                say_text=voice_text,
             )
         else:
             delivery_result = await twilio_adapter.send_whatsapp_message(
@@ -498,12 +528,13 @@ class CollectionsAgent:
             )
 
         # 10. Record Conversation Message in DB
+        final_message_content = voice_text if channel == "VOICE" else outreach_text
         agent_msg = Message(
             conversation_id=conv.id,
             case_id=case.id,
             sender_type="AGENT",
             message_type="TEXT",
-            content=outreach_text,
+            content=final_message_content,
             language=lang,
             provider_message_id=delivery_result.get("provider_message_id") or delivery_result.get("provider_call_id"),
         )
