@@ -8,6 +8,20 @@ from backend.app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
+import urllib.parse
+
+def _format_e164(phone: str) -> str:
+    cleaned = phone.replace("whatsapp:", "").replace(" ", "").replace("-", "").strip()
+    if not cleaned.startswith("+"):
+        if len(cleaned) == 10:
+            cleaned = f"+91{cleaned}"
+        elif len(cleaned) == 12 and cleaned.startswith("91"):
+            cleaned = f"+{cleaned}"
+        else:
+            cleaned = f"+{cleaned}"
+    return cleaned
+
+
 class TwilioAdapter:
     """
     Adapter for Twilio Free Trial Messaging & Voice telephony.
@@ -38,7 +52,8 @@ class TwilioAdapter:
         """
         Sends an outbound WhatsApp message via Twilio or Free-Tier simulator.
         """
-        to_formatted = f"whatsapp:{to_phone}" if not to_phone.startswith("whatsapp:") else to_phone
+        target_phone = _format_e164(to_phone)
+        to_formatted = f"whatsapp:{target_phone}"
 
         if self.is_configured and self.from_whatsapp:
             try:
@@ -61,7 +76,7 @@ class TwilioAdapter:
                         "sent_at": datetime.now(timezone.utc).isoformat(),
                     }
                 else:
-                    logger.warning(f"Twilio WhatsApp request failed: {response.text}")
+                    logger.warning(f"Twilio WhatsApp request returned {response.status_code}: {response.text}")
             except Exception as e:
                 logger.error(f"Error calling Twilio API: {e}")
 
@@ -84,18 +99,23 @@ class TwilioAdapter:
     ) -> Dict[str, Any]:
         """
         Initiates an outbound voice telephony call via Twilio Voice or Free-Tier simulator.
+        Trial accounts disallow inline Twiml parameter, so we provide a dynamic Twimlet Url.
         """
+        target_phone = _format_e164(to_phone)
         if self.is_configured and self.from_phone:
             try:
                 url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Calls.json"
                 data = {
                     "From": self.from_phone,
-                    "To": to_phone,
+                    "To": target_phone,
                 }
                 if twiml_url:
                     data["Url"] = twiml_url
                 elif say_text:
-                    data["Twiml"] = f"<Response><Say language='hi-IN'>{say_text}</Say></Response>"
+                    encoded_msg = urllib.parse.quote(say_text)
+                    data["Url"] = f"https://twimlets.com/message?Message%5B0%5D={encoded_msg}"
+                else:
+                    data["Url"] = "http://demo.twilio.com/docs/voice.xml"
 
                 response = await self.client.post(
                     url,
@@ -110,6 +130,8 @@ class TwilioAdapter:
                         "provider_call_id": call_data.get("sid"),
                         "started_at": datetime.now(timezone.utc).isoformat(),
                     }
+                else:
+                    logger.warning(f"Twilio Voice API returned {response.status_code}: {response.text}")
             except Exception as e:
                 logger.error(f"Error calling Twilio Voice API: {e}")
 

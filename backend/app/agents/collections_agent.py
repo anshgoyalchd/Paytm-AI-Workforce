@@ -346,7 +346,7 @@ class CollectionsAgent:
         from backend.app.models.models import Merchant
         merch_stmt = select(Merchant).where(Merchant.id == case.merchant_id)
         merchant = (await session.execute(merch_stmt)).scalar_one_or_none()
-        business_name = merchant.business_name if merchant else "Paytm Merchant"
+        business_name = merchant.name if merchant else "Paytm Merchant"
 
         setting_stmt = select(AgentSetting).where(AgentSetting.merchant_id == case.merchant_id)
         settings = (await session.execute(setting_stmt)).scalar_one_or_none()
@@ -389,9 +389,12 @@ class CollectionsAgent:
             past_messages_count = len(messages)
         else:
             conv = Conversation(
+                merchant_id=case.merchant_id,
+                customer_id=customer.id,
                 case_id=case.id,
                 channel=customer.preferred_channel or "WHATSAPP",
-                state="ACTIVE",
+                status="INITIATED",
+                language=customer.preferred_language or "Hindi",
             )
             session.add(conv)
             await session.flush()
@@ -473,10 +476,12 @@ class CollectionsAgent:
         # 10. Record Conversation Message in DB
         agent_msg = Message(
             conversation_id=conv.id,
+            case_id=case.id,
             sender_type="AGENT",
-            channel=channel,
+            message_type="TEXT",
             content=outreach_text,
-            delivery_status=delivery_result.get("status", "DELIVERED"),
+            language=lang,
+            provider_message_id=delivery_result.get("provider_message_id") or delivery_result.get("provider_call_id"),
         )
         session.add(agent_msg)
 
@@ -486,9 +491,9 @@ class CollectionsAgent:
             action_type=action_type.value,
             channel=channel,
             status=delivery_result.get("status", "DELIVERED"),
+            idempotency_key=f"auto_{case.id}_{int(datetime.now(timezone.utc).timestamp())}",
             provider=delivery_result.get("provider", "TWILIO"),
             provider_reference=delivery_result.get("provider_message_id") or delivery_result.get("provider_call_id"),
-            payload={"message": outreach_text, "channel": channel},
             executed_at=datetime.now(timezone.utc),
             completed_at=datetime.now(timezone.utc),
         )
