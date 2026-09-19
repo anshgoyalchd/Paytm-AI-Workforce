@@ -127,15 +127,11 @@ class TwilioAdapter:
                 else:
                     edge_twiml_url = "https://paytm-ai-workforce.pages.dev/twiml.xml"
 
-                fallback_twiml_url = "https://paytm-ai-workforce.pages.dev/twiml.xml"
-
                 url = f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Calls.json"
                 data = {
                     "From": self.from_phone,
                     "To": target_phone,
                     "Url": edge_twiml_url,
-                    "FallbackUrl": fallback_twiml_url,
-                    "FallbackMethod": "GET",
                 }
 
                 response = await self.client.post(
