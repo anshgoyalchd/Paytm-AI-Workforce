@@ -29,89 +29,97 @@ async def handle_whatsapp_webhook(
     provider_event_id = MessageSid or f"SIM_MSG_{hashlib.md5((From + Body).encode()).hexdigest()[:16]}"
     logger.info(f"[WEBHOOK] Inbound WhatsApp from {From}: '{Body}' (ID: {provider_event_id})")
 
-    # Idempotency check on webhook event
-    existing_evt = await db.execute(
-        select(WebhookEvent).where(WebhookEvent.provider_event_id == provider_event_id)
-    )
-    if existing_evt.scalar_one_or_none():
-        logger.info(f"[WEBHOOK] Duplicate event {provider_event_id} suppressed.")
-        return Response(content="<Response></Response>", media_type="application/xml")
-
-    # Extract clean phone number
-    clean_phone = From.replace("whatsapp:", "").strip()
-
-    # Find customer(s) matching phone (ordered newest first)
-    cust_res = await db.execute(
-        select(Customer)
-        .where(Customer.phone.ilike(f"%{clean_phone[-10:]}%"))
-        .order_by(Customer.created_at.desc())
-    )
-    customers = cust_res.scalars().all()
-
-    reply_text = "धन्यवाद, आपका संदेश प्राप्त हुआ है।"
-    case_id = None
-    target_customer = None
-    target_case = None
-
-    if customers:
-        # Prefer the customer that has an active overdue case
-        for c in customers:
-            case_res = await db.execute(
-                select(CollectionCase)
-                .where(
-                    CollectionCase.customer_id == c.id,
-                    CollectionCase.status.not_in(["SETTLED", "CLOSED"]),
-                )
-                .order_by(CollectionCase.created_at.desc())
-            )
-            found_case = case_res.scalars().first()
-            if found_case:
-                target_case = found_case
-                target_customer = c
-                break
-
-        if not target_customer:
-            target_customer = customers[0]
-
-        if target_case:
-            case_id = target_case.id
-            try:
-                result = await collections_agent.process_turn(
-                    session=db,
-                    case_id=target_case.id,
-                    incoming_message=Body,
-                    incoming_channel=Channel.WHATSAPP,
-                )
-                reply_text = result.get("agent_response") or reply_text
-            except Exception as e:
-                logger.warning(f"[WEBHOOK] Error processing turn: {e}")
-                # Fallback to direct payment reminder
-                reply_text = f"नमस्ते {target_customer.name} जी! पेटीएम से इनवॉइस बकाया राशि का आवश्यक रिमाइंडर। कृपया सुरक्षित यूपीआई द्वारा भुगतान करें।"
-        else:
-            reply_text = f"नमस्ते {target_customer.name} जी! आपका संदेश प्राप्त हुआ है। पेटीएम कलेक्शंस टीम जल्द ही आपसे संपर्क करेगी।"
-
-    # Log webhook event safely
     try:
-        webhook_event = WebhookEvent(
-            provider="TWILIO_WHATSAPP",
-            event_type="INBOUND_MESSAGE",
-            provider_event_id=provider_event_id,
-            case_id=case_id,
-            payload_hash=hashlib.sha256(Body.encode()).hexdigest(),
-            processing_status="PROCESSED",
-            processed_at=datetime.now(timezone.utc),
+        # Idempotency check on webhook event
+        existing_evt = await db.execute(
+            select(WebhookEvent).where(WebhookEvent.provider_event_id == provider_event_id)
         )
-        db.add(webhook_event)
-        await db.commit()
-    except Exception as e:
-        logger.warning(f"[WEBHOOK] Audit log error: {e}")
-        await db.rollback()
+        if existing_evt.scalar_one_or_none():
+            logger.info(f"[WEBHOOK] Duplicate event {provider_event_id} suppressed.")
+            return Response(content="<Response></Response>", media_type="application/xml")
 
-    twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
+        # Extract clean phone number
+        clean_phone = From.replace("whatsapp:", "").strip()
+
+        # Find customer(s) matching phone (ordered newest first)
+        cust_res = await db.execute(
+            select(Customer)
+            .where(Customer.phone.ilike(f"%{clean_phone[-10:]}%"))
+            .order_by(Customer.created_at.desc())
+        )
+        customers = cust_res.scalars().all()
+
+        reply_text = "धन्यवाद, आपका संदेश प्राप्त हुआ है।"
+        case_id = None
+        target_customer = None
+        target_case = None
+
+        if customers:
+            # Prefer the customer that has an active overdue case
+            for c in customers:
+                case_res = await db.execute(
+                    select(CollectionCase)
+                    .where(
+                        CollectionCase.customer_id == c.id,
+                        CollectionCase.status.not_in(["SETTLED", "CLOSED"]),
+                    )
+                    .order_by(CollectionCase.created_at.desc())
+                )
+                found_case = case_res.scalars().first()
+                if found_case:
+                    target_case = found_case
+                    target_customer = c
+                    break
+
+            if not target_customer:
+                target_customer = customers[0]
+
+            if target_case:
+                case_id = target_case.id
+                try:
+                    result = await collections_agent.process_turn(
+                        session=db,
+                        case_id=target_case.id,
+                        incoming_message=Body,
+                        incoming_channel=Channel.WHATSAPP,
+                    )
+                    reply_text = result.get("agent_response") or reply_text
+                except Exception as e:
+                    logger.warning(f"[WEBHOOK] Error processing turn: {e}")
+                    # Fallback to direct payment reminder
+                    reply_text = f"नमस्ते {target_customer.name} जी! पेटीएम से इनवॉइस बकाया राशि का आवश्यक रिमाइंडर। कृपया सुरक्षित यूपीआई द्वारा भुगतान करें।"
+            else:
+                reply_text = f"नमस्ते {target_customer.name} जी! आपका संदेश प्राप्त हुआ है। पेटीएम कलेक्शंस टीम जल्द ही आपसे संपर्क करेगी।"
+
+        # Log webhook event safely
+        try:
+            webhook_event = WebhookEvent(
+                provider="TWILIO_WHATSAPP",
+                event_type="INBOUND_MESSAGE",
+                provider_event_id=provider_event_id,
+                case_id=case_id,
+                payload_hash=hashlib.sha256(Body.encode()).hexdigest(),
+                processing_status="PROCESSED",
+                processed_at=datetime.now(timezone.utc),
+            )
+            db.add(webhook_event)
+            await db.commit()
+        except Exception as e:
+            logger.warning(f"[WEBHOOK] Audit log error: {e}")
+            await db.rollback()
+
+        twiml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <Response>
     <Message>{reply_text}</Message>
 </Response>"""
-    return Response(content=twiml, media_type="application/xml; charset=utf-8")
+        return Response(content=twiml, media_type="application/xml; charset=utf-8")
+    except Exception as fatal_err:
+        logger.error(f"[WEBHOOK] Unhandled fatal error: {fatal_err}")
+        fallback_xml = """<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Message>नमस्ते! आपका संदेश प्राप्त हुआ है। पेटीएम कलेक्शंस टीम आपसे जल्द ही संपर्क करेगी।</Message>
+</Response>"""
+        return Response(content=fallback_xml, media_type="application/xml; charset=utf-8")
 
 
 @router.post("/voice")
