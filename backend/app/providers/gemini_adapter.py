@@ -1,5 +1,6 @@
 import json
 import re
+import asyncio
 import logging
 from typing import Optional, Dict, Any, Tuple
 from datetime import datetime, timezone, timedelta
@@ -25,10 +26,10 @@ class GeminiAdapter:
 
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
-        self.model_name = settings.GEMINI_MODEL or "gemini-2.0-flash"
+        self.model_name = settings.GEMINI_MODEL or "gemini-1.5-flash"
         self._client_ready = False
 
-        if GENAI_AVAILABLE and self.api_key and not self.api_key.startswith("your_"):
+        if GENAI_AVAILABLE and self.api_key and self.api_key.startswith("AIzaSy"):
             try:
                 genai.configure(api_key=self.api_key)
                 self._client_ready = True
@@ -36,7 +37,7 @@ class GeminiAdapter:
             except Exception as e:
                 logger.warning(f"Failed to initialize Gemini client: {e}. Running with fallback.")
         else:
-            logger.info("No Gemini API key provided. Using deterministic fallback engine.")
+            logger.info("Using deterministic fallback engine for collections reasoning.")
 
     def _sanitize_input(self, text: str) -> str:
         """Sanitizes user input to mitigate prompt injection."""
@@ -77,9 +78,12 @@ Respond ONLY with valid JSON in this exact structure:
 {{"intent": "INTENT_NAME", "confidence": 0.95}}
 """
                 model = genai.GenerativeModel(self.model_name)
-                response = await model.generate_content_async(
-                    prompt,
-                    generation_config={"temperature": 0.1, "response_mime_type": "application/json"},
+                response = await asyncio.wait_for(
+                    model.generate_content_async(
+                        prompt,
+                        generation_config={"temperature": 0.1, "response_mime_type": "application/json"},
+                    ),
+                    timeout=4.0
                 )
                 data = json.loads(response.text)
                 intent_str = data.get("intent", "").upper()

@@ -212,6 +212,7 @@ export const App: React.FC = () => {
           <WorkforceOverview
             overview={overview}
             onNavigateTab={(t) => setCurrentTab(t)}
+            onRefresh={loadAllData}
           />
         )}
 

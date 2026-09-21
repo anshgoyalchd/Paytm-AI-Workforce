@@ -31,8 +31,29 @@ export const WorkforceOverview: React.FC<OverviewProps> = ({ overview, onNavigat
 
   if (!overview) {
     return (
-      <div className="flex items-center justify-center p-16 text-slate-500">
-        Loading workforce metrics...
+      <div className="space-y-6 py-4 animate-pulse">
+        <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <RefreshCw className="h-5 w-5 text-blue-600 animate-spin" />
+            <div>
+              <p className="text-sm font-semibold text-slate-800">Synchronizing Workforce Intelligence...</p>
+              <p className="text-xs text-slate-500">Connecting to Paytm collections state engine and loading debt portfolios.</p>
+            </div>
+          </div>
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              className="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors"
+            >
+              Retry Sync
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-32 bg-slate-200/70 rounded-xl border border-slate-200" />
+          ))}
+        </div>
       </div>
     );
   }
