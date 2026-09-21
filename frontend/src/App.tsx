@@ -36,12 +36,49 @@ export const App: React.FC = () => {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const [isAddCaseOpen, setIsAddCaseOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [backendStatus, setBackendStatus] = useState<'idle' | 'waking' | 'ready'>('idle');
+  const [backendLatency, setBackendLatency] = useState<number | null>(null);
 
   useEffect(() => {
     const handleUnauthorized = () => {
       setCurrentUser(null);
     };
     window.addEventListener('auth:unauthorized', handleUnauthorized);
+
+    // Eager backend health probe & keep-alive
+    let isMounted = true;
+    const wakeTimer = setTimeout(() => {
+      if (isMounted) setBackendStatus('waking');
+    }, 2500);
+
+    const pingBackend = () => {
+      api.pingHealth()
+        .then((res) => {
+          if (!isMounted) return;
+          clearTimeout(wakeTimer);
+          setBackendLatency(res.rtt);
+          setBackendStatus((prev) => {
+            if (prev === 'waking') {
+              setTimeout(() => {
+                if (isMounted) setBackendStatus('idle');
+              }, 4000);
+              return 'ready';
+            }
+            return 'idle';
+          });
+        })
+        .catch(() => {
+          // If direct ping fails or times out, try edge warmup proxy
+          api.warmupEdge().catch(() => {});
+        });
+    };
+
+    pingBackend();
+
+    // Regular 8-minute client heartbeat while dashboard is open to prevent Render spin-down
+    const heartbeatInterval = setInterval(() => {
+      pingBackend();
+    }, 8 * 60 * 1000);
 
     if (localStorage.getItem('paytm_token')) {
       // Refresh current profile from server to ensure active merchant details
@@ -62,6 +99,9 @@ export const App: React.FC = () => {
     }
 
     return () => {
+      isMounted = false;
+      clearTimeout(wakeTimer);
+      clearInterval(heartbeatInterval);
       window.removeEventListener('auth:unauthorized', handleUnauthorized);
     };
   }, []);
@@ -127,6 +167,44 @@ export const App: React.FC = () => {
         onAddCaseClick={() => setIsAddCaseOpen(true)}
         onLogout={api.logout}
       />
+
+      {/* Cold-start status notification */}
+      {backendStatus === 'waking' && (
+        <div className="bg-amber-50 border-b border-amber-200/80 px-4 py-2 text-xs font-medium text-amber-800 transition-all">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+              </span>
+              <span>
+                <strong>Paytm Cloud Instance Initializing:</strong> Render backend is waking up from idle state (~25–40s). Real-time telemetry, calls, and agent models will be active shortly.
+              </span>
+            </div>
+            <span className="hidden sm:inline-block font-mono text-[11px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded border border-amber-300">
+              Waking Container...
+            </span>
+          </div>
+        </div>
+      )}
+
+      {backendStatus === 'ready' && (
+        <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2 text-xs font-medium text-emerald-800 transition-all">
+          <div className="max-w-7xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span>
+                <strong>Paytm AI Neural Engine Online:</strong> Backend container is fully warmed and synchronized.
+              </span>
+            </div>
+            {backendLatency !== null && (
+              <span className="font-mono text-[11px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded border border-emerald-300">
+                RTT: {backendLatency}ms
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">

@@ -20,6 +20,7 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL ? import.meta.env.VITE_API_BA
 const API_BASE = `${BASE_URL}/api/v1`;
 
 const apiClient = axios.create({
+  timeout: 60000, // 60s timeout allows Render cold-start without prematurely failing
   headers: {
     'Content-Type': 'application/json',
   },
@@ -34,10 +35,29 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-// Intercept 401 unauthorized to clear expired session
+// Intercept responses for cold-start retry and 401 unauthorized
 apiClient.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error.config;
+    if (!config) return Promise.reject(error);
+
+    // Track retry count
+    config.__retryCount = config.__retryCount || 0;
+
+    // Retry on cold-start / server booting errors (502, 503, 504, ECONNABORTED, ERR_NETWORK)
+    const isColdStartError =
+      error.code === 'ECONNABORTED' ||
+      error.code === 'ERR_NETWORK' ||
+      (error.response && [502, 503, 504].includes(error.response.status));
+
+    if (isColdStartError && config.__retryCount < 2 && (!config.method || config.method.toLowerCase() === 'get')) {
+      config.__retryCount += 1;
+      // Wait 3 seconds for container to initialize before retry
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      return apiClient(config);
+    }
+
     if (error.response?.status === 401) {
       localStorage.removeItem('paytm_token');
       localStorage.removeItem('paytm_user');
@@ -50,7 +70,7 @@ apiClient.interceptors.response.use(
 export const api = {
   // Authentication & Onboarding
   async login(payload: LoginPayload): Promise<AuthUser> {
-    const res = await axios.post(`${API_BASE}/auth/login`, payload);
+    const res = await axios.post(`${API_BASE}/auth/login`, payload, { timeout: 60000 });
     const data = res.data;
     localStorage.setItem('paytm_token', data.access_token);
     localStorage.setItem('paytm_user', JSON.stringify(data));
@@ -58,7 +78,7 @@ export const api = {
   },
 
   async register(payload: RegisterPayload): Promise<AuthUser> {
-    const res = await axios.post(`${API_BASE}/auth/register`, payload);
+    const res = await axios.post(`${API_BASE}/auth/register`, payload, { timeout: 60000 });
     const data = res.data;
     localStorage.setItem('paytm_token', data.access_token);
     localStorage.setItem('paytm_user', JSON.stringify(data));
@@ -208,4 +228,23 @@ export const api = {
     const res = await apiClient.get(`${BASE_URL}/api/mock/payments/${invoiceId}`);
     return res.data;
   },
+
+  // Health check & keep-alive ping
+  async pingHealth(): Promise<{ status: string; rtt: number }> {
+    const t0 = performance.now();
+    const res = await axios.get(`${BASE_URL}/health`, { timeout: 60000 });
+    const rtt = Math.round(performance.now() - t0);
+    return { status: res.data?.status || 'HEALTHY', rtt };
+  },
+
+  // Cloudflare Edge warmup proxy
+  async warmupEdge(): Promise<any> {
+    try {
+      const res = await axios.get('/api/warmup', { timeout: 60000 });
+      return res.data;
+    } catch (e) {
+      return null;
+    }
+  },
 };
+

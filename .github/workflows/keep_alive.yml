@@ -1,0 +1,28 @@
+name: Backend Keep-Alive
+
+on:
+  schedule:
+    # Run every 10 minutes (Render spins down after 15 minutes of inactivity)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  keep-alive:
+    name: Ping Render Backend Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Backend
+        run: |
+          echo "Pinging Paytm Collections Backend at $(date -u)..."
+          HTTP_RESPONSE=$(curl -s -o /tmp/health_response.txt -w "%{http_code}" --max-time 60 --retry 3 --retry-delay 5 https://paytm-collections-backend.onrender.com/health)
+          echo "HTTP Status: $HTTP_RESPONSE"
+          echo "Response Body:"
+          cat /tmp/health_response.txt
+          echo ""
+          if [ "$HTTP_RESPONSE" -ge 200 ] && [ "$HTTP_RESPONSE" -lt 400 ]; then
+            echo "✅ Backend is healthy and awake!"
+          else
+            echo "⚠️ Backend returned non-200 status: $HTTP_RESPONSE"
+            exit 1
+          fi
