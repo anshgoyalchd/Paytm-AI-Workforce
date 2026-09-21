@@ -59,7 +59,7 @@ Covers:
 
 **Project:** Paytm AI Workforce  
 **MVP:** Autonomous AI Collections Agent  
-**Hackathon Track:** Track 2 — Build AI teammates that don't just respond; they get the job done.
+**Hackathon Track:** Track 3 — Build AI teammates that don't just respond; they get the job done.
 
 This project is a hackathon prototype intended to demonstrate a real, working autonomous AI employee.
 

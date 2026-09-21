@@ -271,7 +271,7 @@ export const App: React.FC = () => {
       {/* Footer */}
       <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Paytm AI Workforce — Autonomous Collections Agent #01 (Track 2: AI Teammates)</span>
+          <span>Paytm AI Workforce — Autonomous Collections Agent #01 (Track 3: AI Teammates)</span>
           <span className="font-mono text-[11px] text-slate-500">Multi-Tenant Production SaaS • Real Overdue Invoices • Gemini Flash</span>
         </div>
       </footer>

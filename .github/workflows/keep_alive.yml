@@ -2,8 +2,10 @@ name: Backend Keep-Alive
 
 on:
   schedule:
-    # Run every 10 minutes (Render spins down after 15 minutes of inactivity)
-    - cron: '*/10 * * * *'
+    # Run every 5 minutes to beat Render's 15-minute inactivity spin-down
+    - cron: '*/5 * * * *'
+  push:
+    branches: [ main ]
   workflow_dispatch:
     # Allows manual trigger from GitHub Actions tab
 

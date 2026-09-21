@@ -54,7 +54,7 @@ This project is being developed for the Paytm Build for India AI Hackathon — D
 
 The selected direction is:
 
-## Track 2 — Build AI teammates that don't just respond; they get the job done.
+## Track 3 — Build AI teammates that don't just respond; they get the job done.
 
 The central interpretation of this track is that the AI should perform work rather than merely provide conversational responses.
 
