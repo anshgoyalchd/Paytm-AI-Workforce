@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bot, Building2, User, Mail, Lock, Phone, ArrowRight, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Bot, Building2, User, Mail, Lock, Phone, ArrowRight, ShieldCheck, CheckCircle2, Shield } from 'lucide-react';
 import { api } from '../services/api';
 import { AuthUser } from '../types';
 
@@ -8,12 +8,12 @@ interface AuthModalProps {
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
-  const [tab, setTab] = useState<'LOGIN' | 'REGISTER'>('REGISTER');
+  const [tab, setTab] = useState<'LOGIN' | 'REGISTER'>('LOGIN');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Login form state
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginEmail, setLoginEmail] = useState('ansh.goyalchd@gmail.com');
   const [loginPassword, setLoginPassword] = useState('');
 
   // Register form state
@@ -65,56 +65,61 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="w-full max-w-lg rounded-xl bg-white border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+      <div className="w-full max-w-lg rounded-2xl bg-white border border-slate-200/90 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
         {/* Header Branding */}
-        <div className="bg-[#002970] p-6 text-white relative">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
-              <Bot className="w-6 h-6 text-white" />
+        <div className="bg-gradient-to-r from-[#002970] via-[#001f54] to-[#002970] p-6 text-white relative">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 shadow-sm">
+              <span className="text-white font-black text-xl">P</span>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight">Paytm AI Workforce</h1>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-blue-500/30 text-blue-100 border border-blue-400/30">
-                  Production
+                <span className="text-white font-extrabold text-2xl tracking-tight">
+                  Pay<span className="text-[#00BAF2]">tm</span>
+                </span>
+                <span className="text-white/80 font-medium text-sm">for Business</span>
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-[#00BAF2]/20 text-[#00BAF2] border border-[#00BAF2]/30">
+                  AI Workforce
                 </span>
               </div>
-              <p className="text-xs text-blue-100/90 mt-0.5">Autonomous Debt Recovery & Multi-Tenant Collections Employee</p>
+              <p className="text-xs text-white/80 mt-0.5 font-medium">
+                Autonomous Debt Recovery & Multi-Tenant Collections Command Center
+              </p>
             </div>
           </div>
         </div>
 
         {/* Tab Selector */}
-        <div className="flex border-b border-slate-200 bg-slate-50 p-1">
-          <button
-            type="button"
-            onClick={() => { setTab('REGISTER'); setError(null); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
-              tab === 'REGISTER'
-                ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                : 'text-slate-500 hover:text-slate-900'
-            }`}
-          >
-            Register Business
-          </button>
+        <div className="flex border-b border-slate-200 bg-slate-50/80 p-1.5 gap-1">
           <button
             type="button"
             onClick={() => { setTab('LOGIN'); setError(null); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               tab === 'LOGIN'
-                ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'bg-white text-[#002970] shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             Merchant Sign In
+          </button>
+          <button
+            type="button"
+            onClick={() => { setTab('REGISTER'); setError(null); }}
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+              tab === 'REGISTER'
+                ? 'bg-white text-[#002970] shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            Register Business
           </button>
         </div>
 
         {/* Content Body */}
         <div className="p-6">
           {error && (
-            <div className="mb-5 p-3.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+            <div className="mb-5 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
               <span className="w-1.5 h-1.5 rounded-full bg-rose-600 shrink-0"></span>
               <span>{error}</span>
             </div>
@@ -123,7 +128,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
           {tab === 'REGISTER' ? (
             <form onSubmit={handleRegister} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Business / Store Name *
                 </label>
                 <div className="relative">
@@ -134,13 +139,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                     placeholder="e.g. Apex Hardware Store"
                     value={businessName}
                     onChange={(e) => setBusinessName(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Owner / Manager Name *
                 </label>
                 <div className="relative">
@@ -151,14 +156,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                     placeholder="e.g. Rajesh Kumar"
                     value={ownerName}
                     onChange={(e) => setOwnerName(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Work Email *
                   </label>
                   <div className="relative">
@@ -169,13 +174,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                       placeholder="merchant@example.com"
                       value={registerEmail}
                       onChange={(e) => setRegisterEmail(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                      className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Mobile Number
                   </label>
                   <div className="relative">
@@ -185,14 +190,14 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                       placeholder="+91-9876543210"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                      className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Secure Password *
                 </label>
                 <div className="relative">
@@ -204,7 +209,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                     placeholder="••••••••"
                     value={registerPassword}
                     onChange={(e) => setRegisterPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   />
                 </div>
               </div>
@@ -213,20 +218,20 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-[#002970] hover:bg-[#001f54] text-white font-semibold text-sm shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#002970] hover:bg-[#001f54] text-white font-bold text-xs shadow-paytm-card transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
                     <>
                       <span>Create Merchant Account & Launch AI</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-4 h-4 text-[#00BAF2]" />
                     </>
                   )}
                 </button>
               </div>
 
-              <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-slate-500">
+              <div className="flex items-center justify-center gap-2 pt-1 text-[11px] text-slate-500 font-medium">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                 <span>Compliant with RBI Fair Recovery Practices 2026</span>
               </div>
@@ -234,7 +239,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
           ) : (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Merchant Email
                 </label>
                 <div className="relative">
@@ -245,13 +250,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                     placeholder="merchant@example.com"
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                   Password
                 </label>
                 <div className="relative">
@@ -262,7 +267,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                     placeholder="••••••••"
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg bg-white border border-slate-300 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full pl-10 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   />
                 </div>
               </div>
@@ -271,17 +276,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onSuccess }) => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-[#002970] hover:bg-[#001f54] text-white font-semibold text-sm shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#002970] hover:bg-[#001f54] text-white font-bold text-xs shadow-paytm-card transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                   ) : (
                     <>
-                      <span>Sign In to Dashboard</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <span>Sign In to Merchant Command Center</span>
+                      <ArrowRight className="w-4 h-4 text-[#00BAF2]" />
                     </>
                   )}
                 </button>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-600 text-[11px] leading-relaxed">
+                <strong>Paytm Merchant Demo Account:</strong> Sign in with your registered merchant credentials or register a new business profile for full multi-tenant data isolation.
               </div>
             </form>
           )}

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, FileText, Upload, User, Phone, Mail, IndianRupee, Calendar, Languages, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, FileText, Upload, User, Phone, Mail, IndianRupee, Calendar, Languages, CheckCircle2, AlertCircle, PlusCircle } from 'lucide-react';
 import { api } from '../services/api';
 import { CollectionCase } from '../types';
 
@@ -57,7 +57,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
         preferred_language: language,
         priority: priority,
       });
-      setSuccessMessage(`Invoice ${invoiceNumber} registered! Autonomous AI agent ready for recovery.`);
+      setSuccessMessage(`Invoice ${invoiceNumber} successfully recorded in Paytm merchant ledger!`);
       setTimeout(() => {
         onSuccess(created);
         onClose();
@@ -110,62 +110,68 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs">
-      <div className="w-full max-w-2xl rounded-xl bg-white border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-150 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+      <div className="w-full max-w-2xl rounded-2xl bg-white border border-slate-200/90 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-150 max-h-[92vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-white">
-          <div>
-            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              <span>Add Overdue Invoice</span>
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Enter customer and invoice details to start autonomous collection workflows
-            </p>
+        <div className="bg-gradient-to-r from-[#002970] via-[#001f54] to-[#002970] p-5 text-white flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center border border-white/20">
+              <FileText className="w-5 h-5 text-[#00BAF2]" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-white font-extrabold text-lg tracking-tight">Pay<span className="text-[#00BAF2]">tm</span></span>
+                <span className="text-white/60 text-xs">|</span>
+                <h2 className="text-sm font-bold tracking-tight text-white">Register Overdue Invoice</h2>
+              </div>
+              <p className="text-xs text-white/80 mt-0.5">
+                Onboard delinquent debtor into autonomous recovery workflow with verified Paytm UPI
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tab Selection */}
-        <div className="flex border-b border-slate-200 bg-slate-50 p-1">
+        <div className="flex border-b border-slate-200 bg-slate-50/80 p-1.5 gap-1">
           <button
             type="button"
             onClick={() => { setTab('MANUAL'); setError(null); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               tab === 'MANUAL'
-                ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'bg-white text-[#002970] shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Single Invoice Form
+            Single Invoice Entry
           </button>
           <button
             type="button"
             onClick={() => { setTab('CSV'); setError(null); }}
-            className={`flex-1 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer ${
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all cursor-pointer ${
               tab === 'CSV'
-                ? 'bg-white text-slate-900 shadow-xs border border-slate-200'
-                : 'text-slate-500 hover:text-slate-900'
+                ? 'bg-white text-[#002970] shadow-xs border border-slate-200'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Bulk CSV Import
+            Bulk CSV Upload
           </button>
         </div>
 
         {/* Messages */}
         {error && (
-          <div className="m-4 p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
+          <div className="m-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2 font-medium">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
         )}
         {successMessage && (
-          <div className="m-4 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 font-medium">
+          <div className="m-4 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs flex items-center gap-2 font-medium">
             <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>{successMessage}</span>
           </div>
@@ -177,35 +183,35 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
             <form onSubmit={handleManualSubmit} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Customer Full Name *
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <User className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                     <input
                       type="text"
                       required
                       placeholder="e.g. Ramesh Sharma"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Mobile Number (+91) *
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <Phone className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                     <input
                       type="tel"
                       required
                       placeholder="+91-9876543210"
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                     />
                   </div>
                 </div>
@@ -213,7 +219,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Invoice Number *
                   </label>
                   <input
@@ -222,16 +228,16 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
                     placeholder="e.g. INV-2026-108"
                     value={invoiceNumber}
                     onChange={(e) => setInvoiceNumber(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Outstanding Amount (₹) *
                   </label>
                   <div className="relative">
-                    <IndianRupee className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <IndianRupee className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                     <input
                       type="number"
                       step="0.01"
@@ -239,7 +245,7 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
                       placeholder="18500"
                       value={amount}
                       onChange={(e) => setAmount(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                     />
                   </div>
                 </div>
@@ -247,33 +253,33 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Due Date *
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <Calendar className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                     <input
                       type="date"
                       required
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Language
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Preferred Language
                   </label>
                   <div className="relative">
-                    <Languages className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                    <Languages className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                     <select
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                      className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                     >
-                      <option value="Hindi">Hindi</option>
+                      <option value="Hindi">Hindi (Sarvam AI)</option>
                       <option value="English">English</option>
                       <option value="Hinglish">Hinglish</option>
                       <option value="Tamil">Tamil</option>
@@ -283,33 +289,33 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Priority
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    Priority Tier
                   </label>
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full px-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   >
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High (Urgent)</option>
-                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium Priority</option>
+                    <option value="HIGH">High (Urgent Recovery)</option>
+                    <option value="LOW">Low Priority</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                  Customer Email (Optional)
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  Customer Email (Instant Delivery)
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 w-4 h-4 text-slate-400" />
+                  <Mail className="absolute left-3 top-3 w-4 h-4 text-slate-400" />
                   <input
                     type="email"
                     placeholder="customer@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 rounded-lg bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 shadow-xs"
+                    className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-white border border-slate-300 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#00BAF2] focus:ring-1 focus:ring-[#00BAF2] shadow-2xs font-semibold"
                   />
                 </div>
               </div>
@@ -318,14 +324,14 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#002970] hover:bg-[#001f54] text-white font-semibold text-xs shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#002970] hover:bg-[#001f54] text-white font-bold text-xs shadow-paytm-card transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -337,11 +343,13 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
             </form>
           ) : (
             <form onSubmit={handleCsvSubmit} className="space-y-4">
-              <div className="p-6 rounded-xl bg-slate-50 border border-dashed border-slate-300 text-center flex flex-col items-center justify-center gap-2">
-                <Upload className="w-8 h-8 text-blue-600" />
+              <div className="p-8 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-300 text-center flex flex-col items-center justify-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center">
+                  <Upload className="w-6 h-6 text-[#002970]" />
+                </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Upload CSV with overdue accounts</p>
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-sm font-bold text-slate-900">Upload Ledger CSV with Overdue Accounts</p>
+                  <p className="text-xs text-slate-500 mt-1">
                     Columns: customer_name, phone, invoice_number, amount, due_date, language
                   </p>
                 </div>
@@ -349,16 +357,16 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
                   type="file"
                   accept=".csv"
                   onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
-                  className="text-xs text-slate-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border file:border-blue-200 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer"
+                  className="text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border file:border-slate-300 file:text-xs file:font-bold file:bg-white file:text-[#002970] hover:file:bg-slate-100 cursor-pointer"
                 />
               </div>
 
               <div className="flex items-center justify-between text-xs text-slate-500 pt-2">
-                <span>Need a template?</span>
+                <span>Need an example template?</span>
                 <button
                   type="button"
                   onClick={downloadSampleCSV}
-                  className="text-blue-600 hover:underline font-semibold cursor-pointer"
+                  className="text-[#00BAF2] hover:underline font-bold cursor-pointer"
                 >
                   Download Sample CSV
                 </button>
@@ -368,14 +376,14 @@ export const AddCaseModal: React.FC<AddCaseModalProps> = ({ isOpen, onClose, onS
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-xs font-semibold rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-xs font-semibold rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={loading || !csvFile}
-                  className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#002970] hover:bg-[#001f54] text-white font-semibold text-xs shadow-xs transition-all disabled:opacity-50 cursor-pointer"
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-[#002970] hover:bg-[#001f54] text-white font-bold text-xs shadow-paytm-card transition-all disabled:opacity-50 cursor-pointer"
                 >
                   {loading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

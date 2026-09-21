@@ -155,7 +155,7 @@ export const App: React.FC = () => {
   const pendingEscalationsCount = escalations.filter((e) => e.status === 'OPEN').length;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen bg-[#F5F7FA] text-slate-900 flex flex-col selection:bg-[#002970] selection:text-white">
       {/* Top Navigation */}
       <Navbar
         currentTab={currentTab}
@@ -269,11 +269,39 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Paytm AI Workforce — Autonomous Collections Agent #01 (Track 3: AI Teammates)</span>
-          <span className="font-mono text-[11px] text-slate-500">Multi-Tenant Production SaaS • Real Overdue Invoices • Gemini Flash</span>
+      {/* Paytm Enterprise Footer */}
+      <footer className="border-t border-slate-200 bg-white py-6 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div className="flex items-center gap-2">
+              <span className="text-[#002970] font-extrabold text-base tracking-tight">Pay<span className="text-[#00BAF2]">tm</span></span>
+              <span className="text-slate-300">|</span>
+              <span className="font-semibold text-slate-700">Autonomous Collections Workforce #01</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#00BAF2]/15 text-[#002970] border border-[#00BAF2]/30">
+                Track 3: AI Teammates
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3 text-[11px] text-slate-500 flex-wrap justify-center">
+              <span className="flex items-center gap-1 font-medium text-slate-600">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00B970]"></span>
+                PCI-DSS Level 1 Certified
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1 font-medium text-slate-600">
+                256-Bit SSL Encrypted
+              </span>
+              <span>•</span>
+              <span className="flex items-center gap-1 font-medium text-slate-600">
+                RBI Fair Practices Code Compliant
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-400">
+            <span>Paytm Payments Bank / One97 Communications Enterprise Architecture Prototype</span>
+            <span className="font-mono text-[10px]">Multi-Tenant Production SaaS • Live Twilio & Gemini Flash</span>
+          </div>
         </div>
       </footer>
     </div>
