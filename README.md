@@ -246,3 +246,16 @@ Paytm AI Workforce exemplifies this theme:
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.  
 Built with ❤️ for the Google DeepMind & Paytm Hackathon.
+
+
+
+
+
+
+
+
+---
+
+## 👥 Contributors
+
+- Ranjan Raj Pandey — Project Development & Contribution
